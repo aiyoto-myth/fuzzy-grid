@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fuzzy Grid: what an agency's match grid really pays you</title>
+<meta name="description" content="For freelance translators. Paste the match analysis from Trados, memoQ, Phrase or any CAT tool. See your real per-word rate under the agency's fuzzy grid, the rate that would make it fair, and whether the PO adds up. Free, runs in your browser.">
+<link rel="canonical" href="https://samsbench.com/fuzzy-grid/">
+<meta property="og:title" content="Fuzzy Grid: what this grid really pays you">
+<meta property="og:description" content="Paste a CAT analysis. See your real rate under the agency's grid, and check the PO. Free, nothing uploaded.">
+<meta property="og:url" content="https://samsbench.com/fuzzy-grid/">
+<meta property="og:image" content="https://samsbench.com/fuzzy-grid/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;600;700&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f4efe4; --card:#fffdf7; --ink:#18202e; --ink2:#3d4656; --rule:#d6ccb6; --rule2:#e8e0cd;
+  --pen:#c4302b; --penInk:#ffffff; --ok:#1d6f45; --hi:#ffe35a; --blue:#1f4fa8; --focus:#1d4ed8;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;line-height:1.12;margin:0}
+h1{font-weight:900;font-size:clamp(30px,5vw,50px);letter-spacing:-.015em;max-width:15em}
+h2{font-weight:700;font-size:22px;display:flex;align-items:center;gap:10px}
+h2 .n{font:600 14px/1 "IBM Plex Mono",monospace;background:var(--ink);color:var(--paper);border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.mono,.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.top{display:flex;align-items:center;gap:10px;padding:14px 0}
+.top b{font-family:Fraunces,Georgia,serif;font-size:21px;font-weight:900}
+.top svg{flex:none}
+.top .sp{flex:1}
+.top a.pro{font-weight:700;text-decoration:none;border:2px solid var(--ink);border-radius:999px;padding:3px 14px}
+.hero{padding:14px 0 6px}
+.hero p{font-size:18px;margin:12px 0 0;max-width:40em}
+.hero .priv{font-size:15px;margin-top:8px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:start;margin-top:22px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:18px}
+.card + .card{margin-top:18px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:2px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:10px;padding:8px 14px;font-weight:700;text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.sm{padding:5px 10px;font-size:14px;border-width:1.5px}
+.btn.pen{background:var(--pen);border-color:var(--pen);color:var(--penInk)}
+textarea{width:100%;min-height:150px;border:1.5px solid var(--rule);border-radius:10px;padding:10px;background:#fff;font:14px/1.45 "IBM Plex Mono",monospace;resize:vertical}
+input[type=number],input[type=text],input[type=email],select{border:1.5px solid var(--rule);border-radius:8px;padding:6px 8px;background:#fff;min-width:0}
+input[type=number]{width:96px}
+label.tog{display:inline-flex;gap:6px;align-items:center}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:5px 12px;font-weight:600}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+table{border-collapse:collapse;width:100%}
+th,td{padding:6px 6px;border-bottom:1px solid var(--rule2);text-align:left;vertical-align:middle}
+th{font-size:13px;font-weight:700;color:var(--ink2)}
+td.r,th.r{text-align:right}
+.rows td input[type=number]{width:104px;text-align:right}
+.rows td select{width:auto;font-size:14px;padding:2px 4px}
+.rows .pa{font-size:13px;color:var(--ink2);display:block;margin-top:2px}
+.rows .lab{font:14px "IBM Plex Mono",monospace;word-break:break-word}
+.check{margin-top:10px;font-weight:600}
+.check.ok{color:var(--ok)}
+.check.bad{color:var(--pen)}
+.note{font-size:14px;color:var(--ink2);overflow-wrap:anywhere}
+#rowsBox p,#rowsBox div{overflow-wrap:anywhere}
+.gridtab{table-layout:fixed}
+.gridtab th select{width:100%;margin-top:4px;font-size:14px}
+.gridtab th:first-child{width:34%}
+.gridtab td input[type=number]{width:70px;text-align:right}
+.gridtab td.pc{white-space:nowrap}
+.gridtab td.pc span{margin-left:2px}
+.tw{overflow-x:auto;max-width:100%}
+.rows input[type=number],.gridtab input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.rows input::-webkit-inner-spin-button,.gridtab input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.bd td{white-space:nowrap}
+.bd i.ar{font-style:normal}
+.empty{border:2px dashed var(--rule);border-radius:12px;padding:16px;color:var(--ink2)}
+/* the verdict slip */
+.slip{background:var(--card);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+.slip .head{background:var(--ink);color:var(--paper);padding:14px 18px}
+.slip .head .k{font-size:14px}
+.slip .head .big{font:600 clamp(32px,4.4vw,44px)/1.1 "IBM Plex Mono",monospace;margin-top:2px}
+.slip .body{padding:16px 18px}
+.slip .line{font-size:18px;margin:0 0 10px}
+.slip .line b{font-family:"IBM Plex Mono",monospace}
+s.pen{text-decoration:none;position:relative;white-space:nowrap}
+s.pen::after{content:"";position:absolute;left:-3px;right:-3px;top:52%;height:2.5px;background:var(--pen);transform:rotate(-6deg)}
+.hi{background:linear-gradient(transparent 52%,var(--hi) 52%);padding:0 2px}
+.ask{border-left:4px solid var(--pen);padding:6px 0 6px 12px;margin:12px 0}
+.bd{font-size:14px;margin-top:6px}
+.bd td,.bd th{padding:4px 4px}
+.stamp{display:inline-block;border:3px solid currentColor;border-radius:8px;padding:4px 10px;font:600 15px "IBM Plex Mono",monospace;letter-spacing:.04em;transform:rotate(-3deg);margin-top:6px}
+.stamp.short{color:var(--pen)}
+.stamp.match{color:var(--ok)}
+.stamp.over{color:var(--blue)}
+.msgtabs{margin:8px 0}
+#msgOut{min-height:220px;font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}
+.fields label{font-size:13px;font-weight:700;display:flex;flex-direction:column;gap:3px}
+.fields input{width:100%}
+/* jobs + pro */
+.jobs td{font-size:14px;overflow-wrap:anywhere}
+#proSec{margin:34px 0 0;background:var(--ink);color:#f4efe4;border-radius:16px;padding:22px}
+#proSec h2{color:#fff}
+#proSec .price{font:600 44px "IBM Plex Mono",monospace;color:var(--hi)}
+#proSec ul{padding-left:20px}
+#proSec .btn{background:var(--hi);border-color:var(--hi);color:var(--ink)}
+#proSec .btn.ghost{background:transparent;color:#f4efe4;border-color:#f4efe4}
+#proSec input{border-color:#56608a}
+#proSec .cols{display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+#proSec .ok{color:#a7e3b1;font-weight:700}
+#proSec .err{color:#ffb4b4;font-weight:700}
+.faq{margin:34px 0}
+.faq details{border-bottom:1px solid var(--rule);padding:10px 0}
+.faq summary{font-weight:700;cursor:pointer}
+footer{padding:26px 0 90px;font-size:14px;color:var(--ink2)}
+#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:9;max-width:90vw}
+#bar{display:none}
+@media (max-width:900px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+
+  #proSec .cols{grid-template-columns:1fr}
+  .fields{grid-template-columns:1fr 1fr}
+  #bar{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper);padding:10px 14px;gap:10px;align-items:center;z-index:8;border:0;width:100%;text-align:left}
+  #bar .num{font-size:17px}
+  #bar .sp{flex:1}
+}
+@media (max-width:520px){
+  .rows td input[type=number]{width:84px}
+  .gridtab td input[type=number]{width:52px}
+  .bd .wc{display:none}
+  .bd .w{display:block}
+  .bd i.ar{display:none}
+  .bd td,.bd th{font-size:13px}
+  .fields{grid-template-columns:1fr}
+  th,td{padding:5px 3px}
+}
+@media print{
+  body{background:#fff}
+  .top,.hero,#c1,#c2,#proSec,.faq,footer,#bar,.noprint,#msgCard{display:none!important}
+  .grid{display:block}
+  .slip{position:static;border:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="5" fill="#18202e"/><g fill="#f4efe4"><rect x="5" y="5" width="8" height="8" rx="1"/><rect x="15" y="5" width="8" height="8" rx="1" opacity=".55"/><rect x="5" y="15" width="8" height="8" rx="1" opacity=".75"/></g><path d="M15 23 L23 15" stroke="#c4302b" stroke-width="3" stroke-linecap="round"/></svg>
+    <b>Fuzzy Grid</b><span class="sp"></span><a class="pro" href="#proSec">Pro</a>
+  </header>
+
+  <section class="hero">
+    <h1>What does this fuzzy grid really pay you?</h1>
+    <p>Paste the match analysis from Trados, memoQ, Phrase or any CAT tool. See your real per-word rate under the agency's grid, the base rate that would make it fair, and whether the PO adds up.</p>
+    <p class="priv">Runs in your browser. Your analysis is never uploaded.</p>
+  </section>
+
+  <div class="grid">
+    <main>
+      <section class="card" id="c1" aria-labelledby="h1s">
+        <h2 id="h1s"><span class="n">1</span>Paste the analysis</h2>
+        <p class="note" style="margin:6px 0 10px">Copy the table from the analysis report (HTML, Excel, PDF or the PO email) and paste it here, or open a Trados Studio analysis report (.xml).</p>
+        <textarea id="paste" spellcheck="false" aria-label="Analysis table" placeholder="Type          Segments   Words   Characters
+Context Match       3        40        220
+Repetitions         5        60        300
+100%               10       120        700
+95% - 99%           2        40        380
+...
+Total              80     1,000      6,000"></textarea>
+        <div class="row" style="margin-top:10px">
+          <label class="btn ghost sm" for="xmlFile" style="cursor:pointer">Open .xml report</label><input type="file" id="xmlFile" accept=".xml,.htm,.html,.csv,.txt,text/*" hidden>
+          <button class="btn ghost sm" id="btnSample">Try a sample</button>
+          <button class="btn ghost sm" id="btnManual">Type the numbers</button>
+          <span class="sp" style="flex:1"></span>
+          <span class="seg" role="group" aria-label="Count by"><button id="uWords" aria-pressed="true">Words</button><button id="uChars" aria-pressed="false">Characters</button></span>
+        </div>
+        <div id="rowsBox" style="margin-top:14px"></div>
+      </section>
+
+      <section class="card" id="c2" aria-labelledby="h2s">
+        <h2 id="h2s"><span class="n">2</span>Your rate and the two grids</h2>
+        <div class="row" style="margin-top:10px">
+          <label>Full rate for this job, per <span id="unitWord">word</span> <input type="number" id="rate" step="0.001" min="0" inputmode="decimal" placeholder="0.10"></label>
+          <select id="cur" aria-label="Currency">
+            <option value="USD">USD $</option><option value="EUR">EUR €</option><option value="GBP">GBP £</option><option value="CAD">CAD $</option><option value="AUD">AUD $</option>
+            <option value="CHF">CHF</option><option value="JPY">JPY ¥</option><option value="CNY">CNY ¥</option><option value="BRL">BRL R$</option><option value="PLN">PLN zł</option><option value="SEK">SEK kr</option><option value="NOK">NOK kr</option><option value="DKK">DKK kr</option><option value="CZK">CZK Kč</option><option value="INR">INR ₹</option>
+          </select>
+          <label>Minimum fee <input type="number" id="minFee" step="1" min="0" inputmode="decimal" placeholder="optional"></label>
+        </div>
+        <div id="gridBox" style="margin-top:14px"></div>
+      </section>
+
+    </main>
+
+    <aside>
+      <div class="slip" id="slip" aria-live="polite">
+        <div class="head"><div class="k" id="slipK">Their grid pays</div><div class="big" id="slipBig">—</div></div>
+        <div class="body" id="slipBody"></div>
+      </div>
+      <section class="card noprint" id="msgCard" style="margin-top:18px" aria-labelledby="hMsg">
+        <h2 id="hMsg">Message to the project manager</h2>
+        <div class="seg msgtabs" role="group" aria-label="Message type"><button id="mPO" aria-pressed="true">Fix the PO</button><button id="mGrid" aria-pressed="false">Counter-offer the grid</button></div>
+        <div class="fields">
+          <label>PM's first name<input type="text" id="fPM" placeholder="Anna"></label>
+          <label>PO or project no.<input type="text" id="fPO" placeholder="PO-10293"></label>
+          <label>Your name<input type="text" id="fMe" placeholder="Your name"></label>
+        </div>
+        <textarea id="msgOut" aria-label="Message" spellcheck="true"></textarea>
+        <div class="row" style="margin-top:8px"><button class="btn" id="btnCopy">Copy message</button><button class="btn ghost" id="btnPrint">Print the breakdown</button></div>
+      </section>
+      <section class="card noprint" id="jobsCard" style="margin-top:18px" aria-labelledby="hJobs">
+        <h2 id="hJobs">Job log</h2>
+        <p class="note" style="margin:6px 0 10px">Save each check with the agency name (step 2) and PO number. See what each agency really pays you over time.</p>
+        <div id="jobsBox"></div>
+      </section>
+    </aside>
+  </div>
+
+  <section id="proSec" aria-labelledby="hPro">
+    <div class="cols">
+      <div>
+        <h2 id="hPro">Fuzzy Grid Pro</h2>
+        <div class="price"><span id="priceTxt">$15</span> <span style="font-size:18px">once</span></div>
+        <ul>
+          <li><b>Every agency's grid, saved by name.</b> Pick it in one tap when their next PO lands. Free keeps three.</li>
+          <li><b>What each agency really pays.</b> Every check you save, averaged per agency: per word in the file and as a share of your rate. The number to bring to a rate talk. Free counts the last 3 jobs.</li>
+          <li><b>Full job log</b> with PO numbers, PO checks, monthly totals and a CSV export.</li>
+          <li><b>Backup file</b> to move everything to another computer.</li>
+        </ul>
+        <p>No account, no subscription. Pay once, unlock with the email you paid with.</p>
+      </div>
+      <div>
+        <p id="proState"></p>
+        <a class="btn" id="btnBuy" href="#" rel="noopener">Get Pro</a>
+        <p style="margin-top:6px;font-size:14px">Secure checkout by Whop, a payment company. Card, Apple Pay or PayPal. You get a receipt.</p>
+        <label for="proKey"><b>Already bought? Enter the email you paid with, or a gift code.</b></label>
+        <div class="row" style="margin-top:6px"><input type="email" id="proKey" placeholder="you@example.com or gift code" style="flex:1 1 220px"><button class="btn ghost" id="btnUnlock">Unlock Pro</button></div>
+        <p id="proMsg" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="hFaq">
+    <h2 id="hFaq">Questions translators ask</h2>
+    <details><summary>Which CAT tools does it read?</summary><p>Tables copied from analysis reports: tested with Trados Studio (English and German labels, the full report with a summary and one table per file), memoQ, Phrase (including the All/TM/MT/NT column groups), XTM labels, and band tables pasted into a PO email (it reads the agency's "Pay %" column, the rate and the PO total). Trados Studio's .xml analysis report opens directly. Wide CSV exports (one row per file, bands as columns) are not read yet: copy the table from the HTML report instead. Every band is listed with the number it read; lines it can't match are listed as skipped, and you can fix any row.</p></details>
+    <details><summary>How does it know which column is the word count?</summary><p>From the header row if there is one ("Words", "Characters"). Otherwise it looks for the columns whose bands add up to the Total row. If it can't tell, it says so and lets you pick the column.</p></details>
+    <details><summary>What is "the base rate that pays what yours does"?</summary><p>The base rate at which the agency's grid pays the same total as your own grid on this job. If your grid pays $1,000 and theirs counts 6,650 weighted words, that is $0.150 a word. It depends on how many matches this job has, so it moves from job to job; the job log averages it over every job you save for that agency.</p></details>
+    <details><summary>What about internal fuzzy matches?</summary><p>Trados lists them separately ("Internal fuzzy"). Each grid has a switch: price them like TM fuzzies, or as new words. Many translators argue for new words; many agencies use the fuzzy rate.</p></details>
+    <details><summary>Are the example grids a standard?</summary><p>No. They are examples to start from. Type the agency's exact percentages from their grid and your own from your rate card.</p></details>
+  </section>
+
+  <footer>Fuzzy Grid is a small tool by Sam's Bench. It does arithmetic on the numbers you give it; check them against your PO and contract before you send anything.</footer>
+</div>
+
+<button id="bar" aria-label="Show result"><span>Their grid pays</span><span class="num" id="barAmt">—</span><span class="sp"></span><span class="num" id="barRate"></span></button>
+<div id="toast" role="status"></div>
+
+<script>
+/*CORE-START*/
+var FG = (function(){
+  'use strict';
+  // Canonical bands a grid prices. Every analysis row is mapped to one of these.
+  var BANDS = [
+    {id:'ctx',   label:'Context / 101% / ICE'},
+    {id:'rep',   label:'Repetitions'},
+    {id:'exact', label:'100% match'},
+    {id:'f95',   label:'95–99%'},
+    {id:'f85',   label:'85–94%'},
+    {id:'f75',   label:'75–84%'},
+    {id:'f50',   label:'50–74%'},
+    {id:'new',   label:'No match / new'},
+    {id:'mt',    label:'MT suggestion'},
+    {id:'nt',    label:'Non-translatable'}
+  ];
+  var BAND_IDS = BANDS.map(function(b){ return b.id; });
+  var PRESETS = {
+    none:   {name:'No discounts (every word full rate)', pct:{ctx:100, rep:100, exact:100, f95:100, f85:100, f75:100, f50:100, new:100, mt:100, nt:100}, internalAsFuzzy:false},
+    agency: {name:'Typical agency grid (example)',        pct:{ctx:0,   rep:25,  exact:25,  f95:30,  f85:60,  f75:60,  f50:100, new:100, mt:70, nt:0},  internalAsFuzzy:true},
+    fair:   {name:'Translator-side grid (example)',       pct:{ctx:20,  rep:30,  exact:30,  f95:60,  f85:60,  f75:100, f50:100, new:100, mt:100, nt:0}, internalAsFuzzy:false}
+  };
+
+  function fuzzyBand(min){
+    if(min >= 95) return 'f95';
+    if(min >= 85) return 'f85';
+    if(min >= 75) return 'f75';
+    if(min >= 50) return 'f50';
+    return 'new';
+  }
+
+  /* ---------- number parsing ---------- */
+  // Returns a number, or NaN. Words are whole numbers, so "1.234" and "1,234" are read as thousands.
+  function num(cell){
+    var s = String(cell == null ? '' : cell).replace(/[\s  '’]/g, '');
+    if(!s) return NaN;
+    if(/%$/.test(s)) return NaN;                              // percentages are never counts
+    if(/^\d{1,3}([.,]\d{3})+$/.test(s)) return +s.replace(/[.,]/g, '');
+    if(/^\d{1,3}(,\d{3})+\.\d+$/.test(s)) return +s.replace(/,/g, '');
+    if(/^\d{1,3}(\.\d{3})+,\d+$/.test(s)) return +s.replace(/\./g, '').replace(',', '.');
+    if(/^\d+([.,]\d+)?$/.test(s)) return +s.replace(',', '.');
+    return NaN;
+  }
+
+  /* ---------- label → band ---------- */
+  var RANGE = /(\d{1,3})\s*%?\s*(?:-|–|—|to|bis|à|a)\s*(\d{1,3})\s*%?/i;
+  function classify(label){
+    var l = String(label || '').toLowerCase().replace(/\s+/g, ' ').replace(/[:*]+$/, '').trim();
+    if(!l) return null;
+    if(/^(total|totals|sum|summe|gesamt|insgesamt|totale|totaal|all|итого|合计|合計|总计)\b/.test(l) || /\btotal\b/.test(l) && !/repet/.test(l)) return {kind:'total'};
+    var internal = /internal|homogen|intern\b|interne/.test(l);
+    var m = l.match(RANGE);
+    if(m && !(/%/.test(l) || /fuzzy|match|treffer|corresp|coinc|band|tm\b/.test(l) || /^\d{1,3}\s*(?:-|–|—|to)\s*\d{1,3}$/.test(l))) m = null;   // "Report_2026-11-24" is not a range
+    if(m){
+      var a = +m[1], b = +m[2], lo = Math.min(a, b), hi = Math.max(a, b);
+      if(lo >= 101) return {kind:'ctx', band:'ctx'};
+      if(lo === 100 && hi === 100) return {kind:'exact', band:'exact'};
+      if(hi <= 100 && hi >= 1){
+        if(/\bmt\b|machine/.test(l)) return {kind:'mt', band:'mt'};
+        if(lo < 50 && !internal) return {kind:'new', band:'new', min:lo, max:hi};
+        return {kind: internal ? 'ifuzzy' : 'fuzzy', band: fuzzyBand(lo), min:lo, max:hi};
+      }
+    }
+    if(/context|kontext|contexte|contexto|contesto|\bice\b|in-?context|perfect|x-?translated|\b10[12] ?%|^10[12]$|locked|gesperrt|verrouill/.test(l)) return {kind:'ctx', band:'ctx'};
+    if(/repet|repeat|cross-?file|wiederhol|répét|repetic|ripetiz|herhal/.test(l)) return {kind:'rep', band:'rep'};
+    if(/machine|\bmt\b|\bnmt\b|\bai\b/.test(l)) return {kind:'mt', band:'mt'};
+    if(/\bnt\b|non[- ]?translat|nicht übersetzbar/.test(l)) return {kind:'nt', band:'nt'};
+    if(/\b100 ?%|^100$|exact|leveraged|\btm\b 100/.test(l)) return {kind:'exact', band:'exact'};
+    if(/no ?match|\bnew\b|untranslated|fragment|kein|neu\b|nouveau|aucune|nuevo|sin coinc|nuov|nessuna|^0 ?%$|fuzzy ?0/.test(l)) return {kind:'new', band:'new'};
+    return null;
+  }
+
+  /* ---------- tabular text ---------- */
+  // Cells keep their place: in delimited text (tab ; | csv) a column is its cell index from the left;
+  // in space-aligned text (PDF copies) it is its index from the right (-1 = last), so a longer label can't shift it.
+  function csvSplit(line){
+    var out = [], cur = '', q = false;
+    for(var i = 0; i < line.length; i++){
+      var ch = line[i];
+      if(q){ if(ch === '"'){ if(line[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if(ch === '"') q = true;
+      else if(ch === ','){ out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    out.push(cur); return out;
+  }
+  function detectMode(lines){
+    var data = lines.filter(function(l){ return /\d/.test(l); });
+    var n = data.length || 1, cnt = function(f){ return data.filter(f).length; };
+    if(cnt(function(l){ return l.indexOf('\t') >= 0; }) >= Math.min(2, n)) return 'tab';             // a pasted table inside an email: the tabbed lines are the table
+    if(cnt(function(l){ return (l.match(/;/g) || []).length >= 2; }) >= Math.min(2, n)) return 'semi';
+    if(cnt(function(l){ return (l.match(/\|/g) || []).length >= 2; }) >= Math.min(2, n)) return 'pipe';
+    lines = data;
+    if(cnt(function(l){ return csvSplit(l).length >= 3; }) >= n * 0.6) return 'csv';
+    if(cnt(function(l){ return /\S {2,}\S/.test(l.trim()); }) >= n * 0.5) return 'spaces';
+    return 'single';
+  }
+  function splitLine(line, mode){
+    if(mode === 'tab') return line.split('\t');
+    if(mode === 'semi' && line.indexOf(';') < 0) return [line];
+    if(mode === 'pipe' && line.indexOf('|') < 0) return [line];
+    if(mode === 'semi') return line.split(';').map(function(c){ return c.replace(/^\s*"|"\s*$/g, ''); });
+    if(mode === 'pipe') return line.split('|').filter(function(c, i, a){ return !((i === 0 || i === a.length - 1) && !c.trim()); });
+    if(mode === 'csv') return csvSplit(line);
+    if(mode === 'spaces') return line.trim().split(/ {2,}|\t/);
+    // single spaces: a leading label (which may hold numbers like "95% - 99%") then ASCII-space separated tokens (NBSP stays inside numbers)
+    var t = line.trim(), lab = '';
+    var lead = t.match(/^(?:internal\s+fuzzy\s+)?\d{1,3}\s*%?\s*(?:-|–|—|to)\s*\d{1,3}\s*%/i) || t.match(/^10[0-2]\s*%/) || t.match(/^[^\d\-–—]*[^\d\s\-–—]/);
+    if(lead){ lab = lead[0]; t = t.slice(lab.length); }
+    var rest = t.trim() ? t.trim().split(/ +/) : [];
+    return [lab].concat(rest);
+  }
+  var LEFT = {tab:1, semi:1, pipe:1, csv:1};
+
+  var HEAD_WORDS = /\b(words?|wörter|worte|mots|palabras|parole|woorden|слова)\b|单词|字数/i;
+  var HEAD_CHARS = /\b(char(acter)?s?|zeichen|caract[eè]res?|caratteri|tekens|символы)\b|字符|文字数/i;
+  var HEAD_SEGS  = /\b(segments?|segmente|segmentos|segmenti|сегменты)\b|句段/i;
+  var HEAD_PAY   = /\b(pay|paid|payable|charged?|discount|rate|tarif|weighting|factor)\b/i;
+  var SUMMARY = /\b(summary|total|all files|batch|zusammenfassung|gesamt|résumé|resumen|riepilogo)\b/i;
+  var CUR = /\b(?:USD|EUR|GBP|CAD|AUD|NZD|CHF|JPY|CNY|PLN|SEK|NOK|DKK|CZK|INR|BRL)\b|[$€£¥]/;
+  var CURMAP = {'$':'USD', '€':'EUR', '£':'GBP', '¥':'JPY'};
+  function pct(cell){ var s = String(cell || '').replace(/\s/g, ''); var m = s.match(/^(\d{1,3}(?:[.,]\d+)?)%?$/); return m ? +m[1].replace(',', '.') : NaN; }
+  function curOf(line){ var m = line.match(CUR); return m ? (CURMAP[m[0]] || m[0].toUpperCase()) : ''; }
+  // the number written next to the currency: "EUR 466.42", "466,42 €", "$1,234", "USD 0.085"
+  function moneyNear(line, isRate){
+    var m = line.match(new RegExp('(?:' + CUR.source + ')\\s*(\\d[\\d.,\\u00a0 ]*\\d|\\d)')) || line.match(new RegExp('(\\d[\\d.,\\u00a0 ]*\\d|\\d)\\s*(?:' + CUR.source + ')'));
+    if(!m) return NaN;
+    var t = m[1].replace(/[\s ]/g, '');
+    var last = Math.max(t.lastIndexOf('.'), t.lastIndexOf(','));
+    if(last < 0) return +t;
+    var tail = t.slice(last + 1), both = t.indexOf('.') >= 0 && t.indexOf(',') >= 0;
+    if(isRate || both || tail.length !== 3) return +(t.slice(0, last).replace(/[.,]/g, '') + '.' + tail);   // last separator is the decimal point
+    return +t.replace(/[.,]/g, '');                                                                            // 1,234 / 1.234 = thousands
+  }
+  // "Recognized Tokens", "Source words", "Pay %" are one column each in a header copied from a PDF
+  function mergeHead(tokens){
+    var out = [];
+    tokens.forEach(function(t){
+      var prev = out[out.length - 1];
+      if(prev != null && (t === '%' || /^type$/i.test(t) && /^match$/i.test(prev) ||
+         /^(words?|chars?|characters|tokens|segments|placeables|tags)$/i.test(t) && /^(source|target|recogni[sz]ed|weighted|effective|payable|repetition|repeated|all|tm|mt|nt|new|total|billable|net)$/i.test(prev)))
+        out[out.length - 1] = prev + ' ' + t;
+      else out.push(t);
+    });
+    return out;
+  }
+  function isDash(c){ return /^[-–—]$/.test(String(c).trim()); }
+  function cellVal(c){ return isDash(c) ? 0 : num(c); }
+
+  function parseTable(text){
+    var lines = String(text).replace(/\r/g, '').split('\n').filter(function(l){ return l.trim(); });
+    var mode = detectMode(lines), left = !!LEFT[mode];
+    var blocks = [], cur = null, header = null, group = null, pending = null, lastText = '', warnings = [], unknown = [], meta = {}, noNums = [];
+    var key = function(i, n){ return left ? i : i - n; };
+    function newBlock(){ cur = {rows: [], total: null, name: lastText}; }
+    function close(){ if(cur && cur.rows.length){ if(!cur.total && cur.totalFirst) cur.total = cur.totalFirst; blocks.push(cur); } cur = null; }
+    lines.forEach(function(line){
+      var cells = splitLine(line, mode).map(function(c){ return String(c).trim(); });
+      var n = cells.length;
+      // label: the text cells before the first count; a bare "100"/"101" first cell is a label too
+      var first = -1;
+      for(var i = 0; i < n; i++){ if(cells[i] !== '' && (!isNaN(num(cells[i])) || isDash(cells[i]))){ first = i; break; } }
+      var labCells = (first < 0 ? cells : cells.slice(0, first)).filter(function(c){ return c !== ''; });
+      if(first >= 0 && !labCells.length && /^\d{1,3}$/.test(cells[first]) && +cells[first] <= 102 && cells.slice(first + 1).some(function(c){ return !isNaN(num(c)); })){ labCells = [cells[first]]; first++; }
+      var c = null, label = '';
+      for(var k = labCells.length - 1; k >= 0 && !c; k--){ c = classify(labCells[k]); if(c) label = labCells[k]; }   // the band name sits next to the numbers
+      if(!c && labCells.length > 1){ c = classify(labCells.join(' ')); if(c) label = labCells.join(' '); }
+      if(!label) label = labCells.join(' ');
+      // money lines from a PO email: "Rate: EUR 0.09 / word", "Total: EUR 466.42". A band line with prices stays a band line.
+      if(CUR.test(line) && !(c && c.kind !== 'total') && /minimum|\bmin\.? fee|hour|hourly|\/ ?h\b|per h\b|review|proofread|dtp|surcharge|rush/i.test(line)){ meta.other = (meta.other || []).concat([line.trim().slice(0, 80)]); return; }
+      if(CUR.test(line) && !(c && c.kind !== 'total')){
+        if(/\b(rate|price|tarif)\b|wortpreis|preis pro|per word|\/ ?word/i.test(line)){ var rv = moneyNear(line, true); if(rv > 0 && rv < 50){ meta.rate = rv; meta.cur = curOf(line); return; } }
+        if(/\b(total|amount|sum|value|payable|grand|summe|betrag|gesamt)|gesamtbetrag|montant|importe|importo/i.test(line)){ var av = moneyNear(line, false); if(av > 0){ if(meta.amount == null || /total|grand|gesamt/i.test(line)) meta.amount = av; meta.cur = meta.cur || curOf(line); return; } }
+      }
+      if(first < 0 && cells.filter(function(x){ return x; }).length === 1 && (labCells[0] || '').length < 40 && /^(tm|mt|nt|nmt)\b|^(machine translation|non-?translatables?|translation memory)\b/i.test(labCells[0] || '')){
+        lastText = labCells[0]; if(cur && cur.rows.length) cur.split = true; return;   // a section heading: TM / MT / NT
+      }
+      if(first < 0){
+        var hcells = (mode === 'single' ? line.trim().split(/ +/) : cells).filter(function(x){ return x; });
+        var isHead = hcells.length >= 2 && !/[.?!:]\s*$/.test(line.trim()) && hcells.every(function(x){ return x.length <= 40; }) &&
+                     cells.some(function(x){ return HEAD_WORDS.test(x) || HEAD_CHARS.test(x) || HEAD_SEGS.test(x); });
+        if(isHead){
+          header = {}; group = null;
+          var hc = mode === 'single' ? mergeHead(line.trim().split(/ +/)) : cells;
+          hc.forEach(function(x, i){ header[key(i, hc.length)] = x; });
+          if(pending){ var g = '', gm = {}; for(var j = 0; j < pending.cells.length; j++){ if(pending.cells[j]) g = pending.cells[j]; gm[key(j, pending.cells.length)] = g; } group = gm; }
+          pending = null; close(); return;
+        }
+        if(c && c.kind !== 'total' && labCells.length === 1){ noNums.push(label); return; }
+        if(cells.filter(function(x){ return x; }).length >= 2) pending = {cells: cells};   // maybe a group row ("All | TM | MT")
+        lastText = cells.filter(function(x){ return x; }).join(' ');
+        if(cur && cur.rows.length && cur.total) close();
+        return;
+      }
+      var v = {}, raw = {};
+      for(var q = first; q < n; q++){ var kk = key(q, n); raw[kk] = cells[q]; v[kk] = cells[q] === '' ? NaN : cellVal(cells[q]); }
+      var counts = Object.keys(v).filter(function(x){ return !isNaN(v[x]); });
+      if(!c){ if(counts.length && label) unknown.push(label); return; }
+      if(!counts.length) return;
+      var row = {label: label || '?', kind: c.kind, band: c.band, min: c.min, max: c.max, v: v, raw: raw};
+      if(c.kind === 'total'){
+        if(!cur || !cur.rows.length){ newBlock(); cur.totalFirst = row; return; }   // memoQ puts "All" on top
+        cur.total = row; close(); lastText = ''; return;
+      }
+      if(cur && cur.split){ close(); }
+      if(!cur) newBlock();
+      if(cur.rows.some(function(r){ return r.label.toLowerCase() === row.label.toLowerCase(); })){ close(); newBlock(); }   // a new table started without a Total row
+      var sec = cur.name || '';
+      if(c.kind !== 'rep' && /^(mt|nmt)\b|^machine translation/i.test(sec)){ row.kind = 'mt'; row.band = 'mt'; row.label = 'MT ' + row.label; }
+      if(/^nt\b|^non-?translatables?/i.test(sec)){ row.kind = 'nt'; row.band = 'nt'; row.label = 'NT ' + row.label; }
+      cur.rows.push(row);
+    });
+    close();
+    if(unknown.length) warnings.push('Skipped lines I could not match to a band: ' + unknown.slice(0, 4).join('; ') + (unknown.length > 4 ? ' …' : ''));
+    if(noNums.length) warnings.push('Found band names without numbers I could read: ' + noNums.slice(0, 4).join('; ') + '.');
+    return {blocks: blocks, header: header, group: group, warnings: warnings, meta: meta, mode: mode, left: left};
+  }
+
+  // Which column holds words / characters / the pay %? Header first, then the Total row, then a default.
+  function pickColumns(t){
+    var all = [], keys = {};
+    t.blocks.forEach(function(b){ all = all.concat(b.rows, b.total ? [b.total] : []); });
+    all.forEach(function(r){ Object.keys(r.v).forEach(function(k){ if(!isNaN(r.v[k])) keys[k] = (keys[k] || 0) + 1; }); });
+    var order = Object.keys(keys).map(Number).sort(function(a, b){ return a - b; });
+    var res = {words: null, chars: null, pay: null, how: '', consistent: [], ambiguous: false, names: {}, keys: order};
+    if(!order.length) return res;
+    if(t.header && !t.left){   // right-aligned header: only usable if it names at least as many columns as the rows have numbers
+      var lens = {}; all.forEach(function(r){ var L = Object.keys(r.v).length; lens[L] = (lens[L] || 0) + 1; });
+      var nmode = +Object.keys(lens).sort(function(a, b){ return lens[b] - lens[a]; })[0];
+      if(Object.keys(t.header).length < nmode + 1) t.header = null;   // +1: the label column
+    }
+    var nameOf = function(k){ return t.header && t.header[k] != null ? ((t.group && t.group[k] ? t.group[k] + ' ' : '') + t.header[k]).trim() : ''; };
+    order.forEach(function(k){ var nm = nameOf(k); if(nm) res.names[k] = nm; });
+    var hw = [], hch = [];
+    if(t.header){
+      Object.keys(t.header).map(Number).forEach(function(k){
+        var h = t.header[k], name = nameOf(k);
+        var derived = /weight|wtd|gewicht|pondér|effective|payable|billable|\bnet\b|equivalent|chargeable|invoic/i.test(name);
+        if(HEAD_WORDS.test(h) && !derived) hw.push({k: k, name: name});
+        else if(HEAD_CHARS.test(h) && !derived) hch.push({k: k, name: name});
+        else if(res.pay == null && !HEAD_WORDS.test(h) && !/\b(rate|price|amount|cost|total|sum)\b|[$€£¥]|\b(eur|usd|gbp)\b/i.test(h.replace(/%/g, ''))){
+          if(/discount|rabatt|remise|descuento|sconto|korting/i.test(h)){ res.pay = k; res.payMode = 'discount'; }
+          else if(/\b(pay|paid|payable|charged?|weighting|factor)\b/i.test(h)) res.pay = k;
+        }
+      });
+    }
+    var best = function(list){   // prefer the "All"/"Total" group, then no group; several left = ask
+      if(!list.length) return null;
+      var a = list.filter(function(x){ return /\b(all|total|gesamt|tous|todos)\b/i.test(x.name); }); if(a.length) return a[0].k;
+      var g = list.filter(function(x){ return !t.group || !t.group[x.k]; });
+      if(g.length > 1 || (!g.length && list.length > 1)) res.ambiguous = true;   // two plain "Words" columns: ask
+      return (g.length ? g : list)[0].k;
+    };
+    res.words = best(hw); res.chars = best(hch);
+    // Columns whose band values add up to the Total row (first block with a Total and at least 2 rows)
+    var tb = t.blocks.filter(function(b){ return b.total && b.rows.length >= 2; })[0];
+    if(tb){
+      order.forEach(function(k){
+        var tv = tb.total.v[k]; if(isNaN(tv) || tv <= 0) return;
+        if(Math.abs(tv - 100) < 0.6 && tb.rows.some(function(r){ return r.v[k] % 1 !== 0; })) return;   // a share-of-total Percent column also adds up to 100
+        var s = 0, ok = true;
+        tb.rows.forEach(function(r){ var x = r.v[k]; if(isNaN(x)) ok = false; else s += x; });
+        if(ok && Math.abs(s - tv) <= Math.max(1, tv * 0.002)) res.consistent.push(k);
+      });
+      var hundred = res.consistent.filter(function(k){ return Math.abs(tb.total.v[k] - 100) < 0.6 && tb.rows.every(function(r){ return r.v[k] <= 100; }); });
+      if(hundred.length && res.consistent.some(function(k){ return tb.total.v[k] > 100.6; })) res.consistent = res.consistent.filter(function(k){ return hundred.indexOf(k) < 0; });   // a share-of-total Percent column
+    }
+    if(res.pay != null){   // a pay/discount column has % cells (or whole numbers 0-100), never prices
+      var pk = res.pay, br = all.filter(function(r){ return r.kind !== 'total'; });
+      var okPay = br.length && br.every(function(r){ var x = pct(r.raw[pk]); return !isNaN(x) && x >= 0 && x <= 100 && (/%/.test(r.raw[pk] || '') || x % 1 === 0); }) && br.some(function(r){ return pct(r.raw[pk]) >= 1; });
+      if(!okPay){ res.pay = null; res.payMode = ''; }
+    }
+    if(res.pay == null && t.blocks.length === 1){   // a column of percentages that doesn't add up to 100 and holds a 100% is a pay grid ("Pay %")
+      var bandRows = all.filter(function(r){ return r.kind !== 'total'; });
+      var rk = {}; bandRows.forEach(function(r){ Object.keys(r.raw).forEach(function(k){ if(/%/.test(r.raw[k])) rk[k] = 1; }); });
+      Object.keys(rk).forEach(function(k){
+        if(res.pay != null) return;
+        var ps = bandRows.map(function(r){ return pct(r.raw[k]); });
+        if(ps.length >= 2 && ps.every(function(x){ return !isNaN(x) && x % 5 === 0; }) && Math.abs(ps.reduce(function(a, b){ return a + b; }, 0) - 100) > 1.5 && ps.some(function(x){ return x === 100; })) res.pay = +k;   // grids are round numbers; shares are not
+      });
+    }
+    if(res.words != null){ res.how = 'header'; return res; }
+    var cons = res.consistent.slice();
+    if(cons.length){
+      var size = function(k){ return tb.total.v[k]; };
+      cons.sort(function(a, b){ return size(a) - size(b); });
+      if(cons.length > 3) res.ambiguous = true;                                        // grouped columns (All/TM/MT…): don't guess quietly
+      if(cons.length >= 3){ res.words = cons[cons.length - 2]; if(res.chars == null) res.chars = cons[cons.length - 1]; }   // segments < words < characters
+      else if(cons.length === 2){
+        var r = size(cons[1]) / Math.max(1, size(cons[0]));
+        res.words = cons[1];
+        if(r >= 3 && r <= 9.5){ res.ambiguous = true; if(res.chars == null) res.chars = cons[1]; }   // segments+words or words+characters? can't tell
+        else if(r < 3 && res.chars == null) res.chars = cons[1];
+      }
+      else res.words = cons[0];
+      res.how = 'total';
+      return res;
+    }
+    // no header, no Total: columns with a number in most rows, in order; the usual layout is Segments, Words, Characters
+    var full = order.filter(function(k){ return keys[k] >= Math.max(1, all.length * 0.6); });
+    if(!full.length) full = order;
+    var ints = full.filter(function(k){ return all.every(function(r){ var x = r.v[k]; return isNaN(x) || x % 1 === 0; }); });   // counts are whole numbers; prices are not
+    if(ints.length) full = ints;
+    res.words = full.length >= 2 ? full[1] : full[0];
+    if(full.length >= 3 && res.chars == null) res.chars = full[2];
+    res.how = 'default';
+    return res;
+  }
+
+  /* ---------- Trados Studio XML analysis report ---------- */
+  function attrs(s){ var o = {}, re = /(\w+)="([^"]*)"/g, m; while((m = re.exec(s))) o[m[1]] = m[2]; return o; }
+  function parseTradosXml(xml){
+    var scope = xml, m = xml.match(/<batchTotal>([\s\S]*?)<\/batchTotal>/);
+    var blocks = [];
+    if(m) blocks = [m[1]];
+    else { var re = /<analyse>([\s\S]*?)<\/analyse>/g, b; while((b = re.exec(xml))) blocks.push(b[1]); }
+    if(!blocks.length) return null;
+    var acc = {}, order = [], total = 0, totalC = 0, hasTotal = false;
+    var NAMES = {perfect:['Perfect match','ctx','ctx'], inContextExact:['Context match','ctx','ctx'], exact:['100%','exact','exact'], locked:['Locked','ctx','ctx'],
+                 crossFileRepeated:['Cross-file repetitions','rep','rep'], repeated:['Repetitions','rep','rep'], 'new':['New','new','new']};
+    blocks.forEach(function(blk){
+      var re = /<(\w+)\s([^>]*?)\/?>/g, e;
+      while((e = re.exec(blk))){
+        var name = e[1], a = attrs(e[2]);
+        if(!('words' in a)) continue;
+        var w = +a.words || 0, ch = +a.characters || 0, key, label, kind, band, min, max;
+        if(name === 'total'){ total += w; totalC += ch; hasTotal = true; continue; }
+        if(name === 'fuzzy' || name === 'internalFuzzy'){
+          min = +a.min; max = +a.max; kind = name === 'fuzzy' ? 'fuzzy' : 'ifuzzy';
+          band = fuzzyBand(min); if(band === 'new' && kind === 'fuzzy') kind = 'new';
+          label = (kind === 'ifuzzy' ? 'Internal fuzzy ' : 'Fuzzy ') + min + '–' + max + '%';
+          key = name + min;
+        } else if(NAMES[name]){ label = NAMES[name][0]; kind = NAMES[name][1]; band = NAMES[name][2]; key = name; }
+        else continue;   // newBaseline, newLearnings, AdaptiveMT extras: not separate work
+        if(!acc[key]){ acc[key] = {label:label, kind:kind, band:band, min:min, max:max, words:0, chars:0}; order.push(key); }
+        acc[key].words += w; acc[key].chars += ch;
+      }
+    });
+    var rows = order.map(function(k){ return acc[k]; });
+    var sum = rows.reduce(function(s, r){ return s + r.words; }, 0);
+    return {rows: rows, total: hasTotal ? total : null, totalChars: hasTotal ? totalC : null, sum: sum, source: 'trados-xml'};
+  }
+
+  /* ---------- one entry point ---------- */
+  // unit: 'words' | 'chars'. opts: {col: forced column key, blocks: 'one'|'sum' to settle look-alike tables} (a number = col).
+  // Returns {rows:[{label,kind,band,min,max,qty}], total, sum, check: ok|mismatch|ambiguous|none, why, source, cols, grid, meta, warnings}
+  function parseAnalysis(text, unit, opts){
+    unit = unit === 'chars' ? 'chars' : 'words';
+    if(typeof opts === 'number' || opts == null) opts = {col: opts};
+    var out = {rows: [], total: null, sum: 0, check: 'none', why: '', source: '', cols: null, warnings: [], meta: {}};
+    if(!text || !String(text).trim()) return out;
+    if(/<analyse>|<batchTotal>|<task\s+name="analyse"/.test(text)){
+      var x = parseTradosXml(String(text));
+      if(x){
+        out.source = 'trados-xml';
+        out.rows = x.rows.map(function(r){ return {label:r.label, kind:r.kind, band:r.band, min:r.min, max:r.max, qty: unit === 'chars' ? r.chars : r.words}; });
+        out.total = x.total == null ? null : (unit === 'chars' ? x.totalChars : x.total);
+      }
+    } else {
+      var t = parseTable(text), c = pickColumns(t);
+      out.source = 'table'; out.cols = c; out.warnings = t.warnings; out.meta = t.meta;
+      var forced = opts.col != null && opts.col !== '' && !isNaN(+opts.col) && c.keys.indexOf(+opts.col) >= 0;
+      var j = forced ? +opts.col : (unit === 'chars' ? (c.chars != null ? c.chars : c.words) : c.words);
+      out.col = j; out.names = c.names; out.keys = c.keys;
+      var qv = function(r){ var v = r.v[j]; return isNaN(v) || v == null ? 0 : v; };
+      var bt = t.blocks.map(function(bk){ var tv = bk.total ? bk.total.v[j] : NaN; return {bk: bk, sum: bk.rows.reduce(function(s, r){ return s + qv(r); }, 0), total: isNaN(tv) || tv == null ? null : tv}; });
+      var size = function(x){ return x.total != null ? x.total : x.sum; };
+      var use = bt, blocksAmb = false;
+      if(bt.length > 1){
+        var near = function(a, b){ return Math.abs(a - b) <= Math.max(1, Math.max(a, b) * 0.002); };
+        var sumOthers = function(x){ return bt.filter(function(y){ return y !== x; }).reduce(function(s, y){ return s + size(y); }, 0); };
+        var named = bt.filter(function(x){ return SUMMARY.test(x.bk.name || ''); })[0];   // a table headed "Summary" is the job, whatever else was pasted
+        var biggest = bt.slice().sort(function(a, b){ return size(b) - size(a); });
+        var ix = bt.indexOf(biggest[0]), edge = ix === 0 || ix === bt.length - 1, plain = !biggest[0].bk.name || SUMMARY.test(biggest[0].bk.name);
+        var unnamed = !named && edge && plain && size(biggest[0]) > size(biggest[1]) + 0.5 && near(size(biggest[0]), sumOthers(biggest[0])) ? biggest[0] : null;
+        var summary = named || unnamed;
+        // sections (TM / MT / NT …) with one Total at the very end: add them and check against that Total
+        var last = bt[bt.length - 1], openEnded = bt.slice(0, -1).every(function(x){ return x.total == null; });
+        var sections = !summary && last.total != null && openEnded && near(bt.reduce(function(s, x){ return s + x.sum; }, 0), last.total);
+        if(opts.blocks === 'one'){ use = [summary || biggest[0]]; out.blocks = {n: bt.length, used: summary ? 'one' : 'largest'}; }
+        else if(opts.blocks === 'sum'){ out.blocks = {n: bt.length, used: 'sum'}; }
+        else if(summary){ use = [summary]; out.blocks = {n: bt.length, used: 'summary'}; }
+        else if(sections){ out.blocks = {n: bt.length, used: 'sections'}; out.sectionTotal = last.total; }
+        else if(bt.every(function(x){ return x.bk.name && !SUMMARY.test(x.bk.name); })) out.blocks = {n: bt.length, used: 'sum'};   // every table has its own (file) name
+        else { blocksAmb = true; out.blocks = {n: bt.length, used: 'unsure'}; }   // a summary plus some files, or files only? ask
+      }
+      var acc = {}, order = [];
+      use.forEach(function(x){ x.bk.rows.forEach(function(r){
+        var k = r.label.toLowerCase();
+        if(!acc[k]){ acc[k] = {label:r.label, kind:r.kind, band:r.band, min:r.min, max:r.max, qty:0, pay: c.pay != null ? pct(r.raw[c.pay]) : NaN}; order.push(k); }
+        acc[k].qty += qv(r);
+      }); });
+      out.rows = order.map(function(k){ var r = acc[k], o = {label:r.label, kind:r.kind, band:r.band, min:r.min, max:r.max, qty:r.qty}; if(!isNaN(r.pay)) o.pay = r.pay; return o; });
+      var tots = use.map(function(x){ return x.total; });
+      out.total = out.sectionTotal != null ? out.sectionTotal : tots.length && tots.every(function(v){ return v != null; }) ? tots.reduce(function(s, v){ return s + v; }, 0) : null;
+      if(out.total == null && use.some(function(x){ return x.total != null; }) && use.some(function(x){ return x.total == null; })) out.warnings.push('Some tables have no Total row, so they could not be cross-checked.');
+      if(c.pay != null){
+        var g = {}, clash = false;
+        out.rows.forEach(function(r){ if(r.pay != null){ if(g[r.band] != null && g[r.band] !== r.pay) clash = true; if(g[r.band] == null) g[r.band] = r.pay; } });
+        if(Object.keys(g).length){ out.grid = g; out.gridMode = c.payMode === 'discount' ? 'discount' : 'pay'; if(clash) out.warnings.push('Two rows in the same band have different pay percentages; check the agency grid.'); }
+      }
+      if(unit === 'chars' && c.chars == null && !forced) out.why = 'nochars';
+      else if(c.ambiguous && !forced) out.why = 'col';
+      else if(blocksAmb) out.why = 'blocks';
+    }
+    out.sum = out.rows.reduce(function(s, r){ return s + (r.qty || 0); }, 0);
+    if(out.total != null) out.check = Math.abs(out.sum - out.total) <= Math.max(1, out.total * 0.002) ? 'ok' : 'mismatch';
+    if(out.why) out.check = 'ambiguous';
+    return out;
+  }
+
+  /* ---------- money ---------- */
+  function r2(x){ return Math.round(x * 100) / 100; }
+  // grid.mode 'discount' means the numbers are discounts off the full rate ("100% matches: 75% discount")
+  function pctFor(row, grid){
+    var b = row.kind === 'ifuzzy' && !grid.internalAsFuzzy ? 'new' : row.band;
+    var p = grid.pct[b];
+    p = p == null || p === '' || isNaN(+p) ? (grid.mode === 'discount' ? 0 : 100) : +p;
+    return grid.mode === 'discount' ? Math.max(0, 100 - p) : p;
+  }
+  // rows: [{qty, band, kind}], grid: {pct:{...}, internalAsFuzzy}, rate: per unit
+  function apply(rows, grid, rate){
+    var raw = 0, weighted = 0, lines = [];
+    rows.forEach(function(r){
+      var q = +r.qty || 0, p = pctFor(r, grid), w = q * p / 100;
+      raw += q; weighted += w;
+      lines.push({qty:q, pct:p, weighted:w});
+    });
+    var amount = weighted * (+rate || 0);
+    return {raw: raw, weighted: weighted, amount: amount, perRaw: raw ? amount / raw : 0, share: raw ? weighted / raw : 0, lines: lines};
+  }
+  // Their grid vs your grid on the same analysis, at your base rate.
+  function compare(rows, their, mine, rate, minFee){
+    rate = +rate || 0; minFee = +minFee || 0;
+    var a = apply(rows, their, rate), b = apply(rows, mine, rate);
+    var ta = a.amount, mb = Math.max(b.amount, minFee);   // the minimum fee is yours; the agency's grid is what the PO should show
+    return {
+      their: a, mine: b, theirAmount: ta, myAmount: mb,
+      gap: mb - ta,                                         // what their grid costs you on this job
+      gapPct: mb ? (mb - ta) / mb : 0,
+      effRate: a.raw ? ta / a.raw : 0,                      // what your rate really is under their grid, per raw unit
+      neededRate: a.weighted ? mb / a.weighted : 0,         // base rate that makes their grid pay what yours does
+      raisePct: rate && a.weighted ? (mb / a.weighted) / rate - 1 : 0,
+      minApplied: minFee > 0 && b.amount < minFee, belowMin: minFee > 0 && a.amount < minFee, minFee: minFee
+    };
+  }
+  // PO check against their grid. Only rounding is forgiven: half a weighted word per band at the rate, never more than 1.00.
+  function checkPO(expected, poAmount, rate, bands){
+    if(poAmount === '' || poAmount == null) return null;
+    var po = +poAmount; if(!(po >= 0)) return null;
+    var diff = expected - po, tol = Math.min(1, Math.max(0.01, (bands || 1) * 0.5 * (+rate || 0)));
+    var v = Math.abs(diff) < 0.005 ? 'match' : Math.abs(diff) <= tol ? 'rounding' : (diff > 0 ? 'short' : 'over');
+    return {po: po, expected: expected, diff: diff, tol: tol, verdict: v};
+  }
+
+  return {BANDS: BANDS, BAND_IDS: BAND_IDS, PRESETS: PRESETS, num: num, classify: classify, parseTable: parseTable, pickColumns: pickColumns,
+          parseTradosXml: parseTradosXml, detectMode: detectMode, csvSplit: csvSplit, parseAnalysis: parseAnalysis, apply: apply, compare: compare, checkPO: checkPO, fuzzyBand: fuzzyBand, r2: r2};
+})();
+/*CORE-END*/
+(function(){
+'use strict';
+var SITE = 'https://samsbench.com/fuzzy-grid/';
+var APP_KEY = 'fuzzy-grid';
+var VERIFY_URL = 'https://app-bizz-api.whop.site/api/verify';
+var CHECKOUT_HOME = 'https://whop.com/checkout/ch_HmNbKjjACYKNntv/';      // one-time, returns to SITE?bought=1#proSec
+var CHECKOUT_PLAN = 'https://whop.com/checkout/plan_XjpC7M40gaZJs';      // same price; used with ?a=<affiliate>
+var PRICE = '$15';
+var GIFT = [];                          // SHA-256 of gift codes handed out in letters
+var KEY = 'fg.v1', PROKEY = 'fg.pro', FREE_GRIDS = 3, FREE_JOBS = 3;
+
+/* ---------- measurement (GoatCounter). Copied from Handbell Chart / Family Formals: the ?via code follows the visitor down the funnel. ---------- */
+var GC_CODE = 'fuzzygrid';
+var SRC = (function(){ try{
+  var q = new URLSearchParams(location.search), v = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
+  if(v){ sessionStorage.setItem('fg.src', v); return v; }
+  return sessionStorage.getItem('fg.src') || '';
+}catch(e){ return ''; } })();
+var FUNNEL_EV = {'tool-start':1, 'analysis-parsed':1, 'result-shown':1, 'po-checked':1, 'po-short':1, 'msg-copied':1, 'print':1, 'job-saved':1,
+                 'pro-view':1, 'pro-limit':1, 'buy-click':1, 'pro-unlocked':1, 'pro-gift':1};
+var ONCE = {}, QUEUE = [], SENDING = false, GC_READY = 0;
+/* Hits leave one at a time, 700 ms apart: GoatCounter's /count allows 4 requests/second per IP+UA and silently drops the rest (bizz-handbell 11-24). */
+var SKIP = (function(){ try{ return localStorage.getItem('skipgc') === 't'; }catch(e){ return false; } })();   // hand testing: count nothing
+function track(name){
+  if(!GC_CODE || SKIP) return;
+  try{
+    if(SRC.indexOf('selftest') === 0){ QUEUE.push(name + '.' + SRC); drain(); return; }   // self-tests send only the .selftest copy (ledger SELFTEST_SUFFIX_ONLY)
+    if(SRC && FUNNEL_EV[name]) QUEUE.push(name + '.' + SRC);
+    QUEUE.push(name); drain();
+  }catch(e){}
+}
+function drain(){
+  if(SENDING || !QUEUE.length) return;
+  if(!(window.goatcounter && window.goatcounter.count)){ SENDING = true; setTimeout(function(){ SENDING = false; drain(); }, 400); return; }
+  if(!GC_READY){ GC_READY = Date.now(); }
+  if(Date.now() - GC_READY < 1500){ SENDING = true; setTimeout(function(){ SENDING = false; drain(); }, 1500 - (Date.now() - GC_READY)); return; }
+  var n = QUEUE.shift(); SENDING = true;
+  try{ window.goatcounter.count({path: n, title: n, event: true}); }catch(e){}
+  setTimeout(function(){ SENDING = false; drain(); }, 700);
+}
+function trackOnce(name){ if(ONCE[name]) return; ONCE[name] = 1; track(name); }
+
+/* ---------- state ---------- */
+var CUR_OK = {USD:1,EUR:1,GBP:1,CAD:1,AUD:1,CHF:1,JPY:1,CNY:1,BRL:1,PLN:1,SEK:1,NOK:1,DKK:1,CZK:1,INR:1};
+function lsGet(k, d){ try{ var t = localStorage.getItem(k); return t ? JSON.parse(t) : d; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function preset(id, ok){ var p = FG.PRESETS[id]; return {name: p.name, preset: id, mode: 'pay', pct: clone(p.pct), internalAsFuzzy: p.internalAsFuzzy, confirmed: !!ok}; }
+function ready(w){ return !!(S.demo || S[w].confirmed || S[w].saved); }
+function fresh(){ return {text:'', unit:'words', col:null, rows:[], src:'', total:null, ambiguous:false, why:'', fromPO:'', blockMode:'', rowsEdited:false, rowsText:'', demo:false, poSig:'', rate:'', cur:'USD', minFee:'', their: preset('agency'), mine: preset('fair'),
+                          grids:[], po:'', msg:{kind:'po', pm:'', po:'', me:''}, jobs:[]}; }
+var S = (function(){
+  var s = lsGet(KEY, null), f = fresh();
+  if(!s || typeof s !== 'object') return f;
+  var NUMNULL = {col:1, total:1};
+  Object.keys(f).forEach(function(k){
+    if(NUMNULL[k]){ if(!(s[k] === null || (typeof s[k] === 'number' && isFinite(s[k])))) s[k] = null; return; }
+    if(s[k] == null || typeof s[k] !== typeof f[k] || Array.isArray(f[k]) !== Array.isArray(s[k])) s[k] = f[k];
+  });
+  if(!CUR_OK[s.cur]) s.cur = 'USD';
+  ['blockMode','rowsText','why','fromPO','text','rate','minFee','po','src','unit','poSig'].forEach(function(k){ if(s[k] != null && typeof s[k] !== 'string') s[k] = String(s[k]); });
+  if(s.unit !== 'chars') s.unit = 'words';
+  ['their','mine'].forEach(function(g){ if(!s[g].pct || typeof s[g].pct !== 'object') s[g] = f[g]; FG.BAND_IDS.forEach(function(b){ if(isNaN(+s[g].pct[b])) s[g].pct[b] = 100; }); });
+  s.rows = s.rows.filter(function(r){ return r && FG.BAND_IDS.indexOf(r.band) >= 0; }).map(function(r){ return {label:String(r.label || ''), kind:String(r.kind || r.band), band:r.band, qty: Math.max(0, +r.qty || 0)}; });
+  s.jobs = s.jobs.filter(function(j){ return j && typeof j === 'object'; }).map(function(j){
+    ['date','agency','ref','amountTxt','poTxt','verdict','unit'].forEach(function(k){ j[k] = j[k] == null ? '' : String(j[k]); });
+    if(!CUR_OK[j.cur]) j.cur = 'USD'; ['raw','weighted','amount','rate'].forEach(function(k){ j[k] = +j[k] || 0; }); return j; });
+  s.grids = s.grids.filter(function(g){ return g && g.pct && typeof g.pct === 'object' && !Array.isArray(g.pct) && typeof g.name === 'string'; });
+  if(!s.msg || typeof s.msg !== 'object') s.msg = f.msg;
+  ['pm','po','me'].forEach(function(k){ s.msg[k] = s.msg[k] == null ? '' : String(s.msg[k]); }); if(s.msg.kind !== 'grid') s.msg.kind = 'po';
+  return s;
+})();
+var PRO = lsGet(PROKEY, null);
+function isPro(){ return !!(PRO && (PRO.email || PRO.gift)); }
+function save(){ lsSet(KEY, S); }
+
+/* ---------- helpers ---------- */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+function money(x){
+  var c = S.cur || 'USD', d = c === 'JPY' ? 0 : 2;
+  try{ return new Intl.NumberFormat('en-US', {style:'currency', currency:c, minimumFractionDigits:d, maximumFractionDigits:d}).format(x); }catch(e){ return esc(c) + ' ' + x.toFixed(d); }
+}
+function rateFmt(x){   // per-word rates need more decimals than totals
+  var c = S.cur || 'USD', d = x >= 10 ? 2 : x >= 1 ? 3 : 4;
+  if(c === 'JPY' || c === 'CNY') d = x >= 10 ? 1 : 2;
+  try{ return new Intl.NumberFormat('en-US', {style:'currency', currency:c, minimumFractionDigits:Math.min(d, 2), maximumFractionDigits:d}).format(x); }catch(e){ return c + ' ' + x.toFixed(d); }
+}
+function n0(x){ return Math.round(x).toLocaleString('en-US'); }
+function n1(x){ return (Math.round(x * 10) / 10).toLocaleString('en-US'); }
+function pc(x){ return (Math.round(x * 1000) / 10).toLocaleString('en-US') + '%'; }
+function unitW(){ return S.unit === 'chars' ? 'character' : 'word'; }
+function unitWs(){ return S.unit === 'chars' ? 'characters' : 'words'; }
+var toastT;
+function say(t){ var el = $('toast'); el.textContent = t; el.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(function(){ el.style.display = 'none'; }, 3600); }
+var BAND_LABEL = {}; FG.BANDS.forEach(function(b){ BAND_LABEL[b.id] = b.label; });
+var BAND_SHORT = {ctx:'Context', rep:'Repetition', exact:'100%', f95:'95–99%', f85:'85–94%', f75:'75–84%', f50:'50–74%', 'new':'New', mt:'MT', nt:'Non-transl.'};
+
+/* ---------- parsing into state ---------- */
+var lastParse = null;
+var ACTED = false, PARSED_ONCE = false;   // this page view: did the visitor do something themselves?
+// how: 'fresh' = a new paste or file (takes a PO's numbers, counts the event); 'quiet' = sample, unit, column, tables; 'boot' = reload (keeps hand edits)
+function reparse(how){
+  var p = FG.parseAnalysis(S.text, S.unit, {col: S.col, blocks: S.blockMode});
+  lastParse = p;
+  var keepRows = how === 'boot' && S.rowsEdited && S.rowsText === S.text && S.rows.length;
+  if(!keepRows){ S.rows = p.rows.map(function(r){ return {label:r.label, kind:r.kind, band:r.band, qty:r.qty}; }); S.rowsEdited = false; S.rowsText = S.text; }
+  S.src = p.source; S.total = p.total; S.ambiguous = p.check === 'ambiguous'; S.why = p.why || '';
+  if(how === 'fresh'){
+    var sig = p.grid || (p.meta && (p.meta.rate || p.meta.amount)) ? JSON.stringify([p.grid || null, p.meta.rate || null, p.meta.amount || null, p.meta.cur || '']) : '';
+    if(!sig && S.poSig){   // a new analysis without a PO: drop the old PO's numbers
+      S.po = ''; if(S.their.name === 'From the pasted PO') S.their = preset('agency'); S.fromPO = ''; S.poSig = '';
+    }
+    if(sig && sig !== S.poSig){   // a pasted PO email: take the agency's own numbers, once per PO
+      S.poSig = sig; S.fromPO = '';
+      var bits = [];
+      if(p.grid){ var g = preset('agency', true); g.name = 'From the pasted PO'; g.mode = p.gridMode || 'pay'; Object.keys(p.grid).forEach(function(b){ g.pct[b] = p.grid[b]; }); S.their = g; bits.push('the agency grid'); }
+      if(p.meta.cur && CUR_OK[p.meta.cur]) S.cur = p.meta.cur;
+      if(p.meta.rate){ S.rate = String(p.meta.rate); bits.push('the rate'); }
+      if(p.meta.amount){ S.po = String(p.meta.amount); bits.push('the PO amount'); }
+      S.fromPO = 'Read from the pasted PO: ' + bits.join(', ') + '. Check them below.';
+    }
+    if(p.rows.length){ if(!PARSED_ONCE){ PARSED_ONCE = true; track('analysis-parsed'); } if(p.check === 'mismatch') trackOnce('parse-mismatch'); }
+    else if(S.text.trim()) trackOnce('parse-none');
+  }
+}
+function act(){ start(); ACTED = true; }
+function edited(){ S.rowsEdited = true; act(); }
+function manualRows(){
+  S.text = ''; S.src = 'manual'; S.total = null; S.col = null; S.ambiguous = false; S.why = ''; S.blockMode = ''; S.fromPO = ''; lastParse = null; S.rowsEdited = true; S.rowsText = '';
+  S.rows = ['ctx','rep','exact','f95','f85','f75','f50','new'].map(function(b){ return {label: BAND_LABEL[b], kind: b === 'new' ? 'new' : b, band: b, qty: 0}; });
+}
+var SAMPLE = ['Type\tSegments\tWords\tCharacters\tPercent', 'Context Match\t14\t212\t1,190\t2.3%', 'Repetitions\t61\t904\t5,061\t9.8%', 'Cross-file Repetitions\t9\t118\t655\t1.3%',
+  '100%\t88\t1,302\t7,210\t14.1%', '95% - 99%\t31\t487\t2,804\t5.3%', '85% - 94%\t40\t633\t3,566\t6.9%', '75% - 84%\t37\t598\t3,310\t6.5%', '50% - 74%\t52\t871\t4,902\t9.4%',
+  'New\t301\t4,105\t23,770\t44.5%', 'Total\t633\t9,230\t52,468\t100%'].join('\n');
+
+/* ---------- render: analysis rows ---------- */
+function renderRows(){
+  var box = $('rowsBox');
+  if(!S.rows.length){
+    box.innerHTML = S.text.trim() ? '<div class="empty"><b>No match bands found in that text.</b> Paste the table that lists bands like "Repetitions", "100%", "95% - 99%", "No match" with their counts, or <button class="btn ghost sm" data-act="manual">type the numbers</button>.</div>' : '';
+    return;
+  }
+  var p = lastParse, h = '';
+  if(S.src === 'table' && p && p.keys && p.keys.length > 1){
+    h += '<div class="row note" style="margin-bottom:6px">Reading the <select id="colSel" aria-label="Which number to count">';
+    p.keys.forEach(function(k, i){ h += '<option value="' + k + '"' + (k === p.col ? ' selected' : '') + '>' + (p.names && p.names[k] ? esc(p.names[k]) : ordinal(i + 1) + ' number' + colHint(k)) + '</option>'; });
+    h += '</select> column as ' + unitWs() + '.</div>';
+  }
+  if(S.src === 'trados-xml') h += '<p class="note" style="margin:0 0 6px">Read from a Trados Studio analysis report.</p>';
+  h += '<div class="tw"><table class="rows"><thead><tr><th>In the report</th><th class="r">' + (S.unit === 'chars' ? 'Characters' : 'Words') + '</th><th></th></tr></thead><tbody>';
+  S.rows.forEach(function(r, i){
+    h += '<tr><td><div class="lab">' + esc(r.label) + (r.kind === 'ifuzzy' ? ' <span class="note">(internal)</span>' : '') + '</div><label class="pa">priced as <select data-band="' + i + '" aria-label="Band for ' + esc(r.label) + '">';
+    FG.BANDS.forEach(function(b){ h += '<option value="' + b.id + '"' + (b.id === r.band ? ' selected' : '') + '>' + esc(BAND_SHORT[b.id]) + '</option>'; });
+    h += '</select></label></td><td class="r"><input type="number" min="0" step="1" data-qty="' + i + '" value="' + (r.qty || 0) + '" aria-label="' + esc(r.label) + ' count"></td>' +
+         '<td><button class="btn ghost sm" data-del="' + i + '" aria-label="Remove ' + esc(r.label) + '">×</button></td></tr>';
+  });
+  var sum = S.rows.reduce(function(s, r){ return s + (+r.qty || 0); }, 0);
+  h += '</tbody><tfoot><tr><th>Sum of bands</th><th></th><th class="r num">' + n0(sum) + '</th><th></th></tr></tfoot></table></div><div id="chk"></div>';
+  h += '<div class="row" style="margin-top:6px"><button class="btn ghost sm" data-act="addrow">Add a band</button></div>';
+  if(p && p.warnings && p.warnings.length) h += '<p class="note">' + esc(p.warnings.join(' ')) + '</p>';
+  box.innerHTML = h;
+  renderCheck();
+}
+function checkState(){   // 'ok' | 'mismatch' | 'ambiguous' | 'edited' | 'none'. Only an unedited parse that doesn't add up blocks the money.
+  var sum = S.rows.reduce(function(s, r){ return s + (+r.qty || 0); }, 0);
+  var off = S.total != null && Math.abs(sum - S.total) > Math.max(1, S.total * 0.002);
+  if(S.ambiguous) return 'ambiguous';   // an open question (which column? summary or files?) needs an answer first
+  if(S.rowsEdited) return off ? 'edited' : (S.total == null ? 'none' : 'ok');
+  if(S.total == null) return 'none';
+  return off ? 'mismatch' : 'ok';
+}
+function renderCheck(){
+  var el = $('chk'); if(!el) return;
+  var sum = S.rows.reduce(function(s, r){ return s + (+r.qty || 0); }, 0), h = '';
+  var st = checkState();
+  if(st === 'ambiguous' && S.why === 'nochars') h = '<p class="check bad">I found no characters column in this table. Pick the column above, or switch back to Words.</p>';
+  else if(st === 'ambiguous' && S.why === 'blocks') h = '<div class="check bad"><p style="margin:0 0 6px">I found ' + ((lastParse && lastParse.blocks && lastParse.blocks.n) || 2) + ' tables. Is one of them the summary of the job, or is each one a file?</p><div class="row"><button class="btn ghost sm" data-act="blk-one">One is the summary</button><button class="btn ghost sm" data-act="blk-sum">They are files: add them</button></div></div>';
+  else if(st === 'ambiguous') h = '<p class="check bad">Several columns could be the ' + unitW() + ' count. Pick the right one above (look at its header in your report).</p>';
+  else if(st === 'edited') h = '<p class="check note">You changed the counts by hand. The report\'s Total was ' + n0(S.total) + '; the bands now add up to ' + n0(sum) + '.</p>';
+  else if(S.total != null){
+    var ok = st === 'ok';
+    h = ok ? '<p class="check ok">Adds up to the report\'s Total: ' + n0(S.total) + ' ' + unitWs() + '.</p>'
+           : '<p class="check bad">These add up to ' + n0(sum) + '; the report\'s Total says ' + n0(S.total) + '. Check the column and the rows before you trust the result.</p>';
+  } else if(S.src === 'table') h = '<p class="check note">No Total row found, so nothing to cross-check. Compare the sum with your report.</p>';
+  var p = lastParse;
+  if(p && p.blocks && p.blocks.used !== 'unsure') h += '<p class="note">' + (p.blocks.used === 'summary' || p.blocks.used === 'one' ? 'Found ' + p.blocks.n + ' tables; used the summary once.' : p.blocks.used === 'largest' ? 'Found ' + p.blocks.n + ' tables; used the largest one.' : p.blocks.used === 'sections' ? 'Found ' + p.blocks.n + ' sections (TM / MT / NT); added them up.' : 'Found ' + p.blocks.n + ' tables (one per file); added them up.') + (S.blockMode ? '' : ' <button class="btn ghost sm" data-act="' + (p.blocks.used === 'sum' ? 'blk-one' : 'blk-sum') + '">' + (p.blocks.used === 'sum' ? 'No, use one of them' : 'No, add them all') + '</button>') + '</p>';
+  if(S.fromPO) h += '<p class="note"><b>' + esc(S.fromPO) + '</b></p>';
+  el.innerHTML = h;
+  renderSlip();
+}
+function ordinal(n){ return n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'); }
+function colHint(j){
+  var c = lastParse && lastParse.cols; if(!c) return '';
+  if(j === c.words) return ' (words?)';
+  if(j === c.chars) return ' (characters?)';
+  return '';
+}
+
+/* ---------- render: grids ---------- */
+function bandsShown(){
+  var used = {}; S.rows.forEach(function(r){ used[r.band] = 1; });
+  var ids = FG.BAND_IDS.filter(function(b){ return used[b]; });
+  return ids.length ? ids : FG.BAND_IDS.filter(function(b){ return b !== 'mt'; });
+}
+function gridSelect(which){
+  var g = S[which], h = '<select data-gmode="' + which + '" aria-label="How the numbers are written"><option value="pay"' + (g.mode !== 'discount' ? ' selected' : '') + '>% of rate paid</option><option value="discount"' + (g.mode === 'discount' ? ' selected' : '') + '>% discount</option></select><select data-gsel="' + which + '" aria-label="' + (which === 'their' ? 'Agency grid' : 'Your grid') + ' preset">';
+  h += '<option value="">' + esc(g.name || 'Custom') + '</option>';
+  Object.keys(FG.PRESETS).forEach(function(id){ h += '<option value="p:' + id + '">' + esc(FG.PRESETS[id].name) + '</option>'; });
+  (isPro() ? S.grids : S.grids.slice(0, FREE_GRIDS)).forEach(function(sg, i){ h += '<option value="g:' + i + '">Saved: ' + esc(sg.name) + '</option>'; });
+  return h + '</select>';
+}
+function renderGrids(){
+  var hasIf = S.rows.some(function(r){ return r.kind === 'ifuzzy'; });
+  var h = '<div class="tw"><table class="gridtab"><thead><tr><th>Band</th><th>Agency\'s grid<br>' + gridSelect('their') + '</th><th>Your grid<br>' + gridSelect('mine') + '</th></tr></thead><tbody>';
+  bandsShown().forEach(function(b){
+    h += '<tr><td>' + esc(BAND_LABEL[b]) + '</td>';
+    ['their','mine'].forEach(function(w){ h += '<td class="pc"><input type="number" min="0" max="300" step="1" data-pct="' + w + ':' + b + '" value="' + S[w].pct[b] + '" aria-label="' + (w === 'their' ? 'Agency' : 'Your') + ' percent for ' + esc(BAND_LABEL[b]) + '"><span>%</span></td>'; });
+    h += '</tr>';
+  });
+  if(hasIf){
+    h += '<tr><td>Internal fuzzies</td>';
+    ['their','mine'].forEach(function(w){ h += '<td><label class="tog"><input type="checkbox" data-ifz="' + w + '"' + (S[w].internalAsFuzzy ? ' checked' : '') + '> as fuzzy</label></td>'; });
+    h += '</tr>';
+  }
+  h += '</tbody></table></div><p class="note" style="margin:8px 0 0">Type the numbers the way the agency\'s grid writes them: percent of the rate paid, or percent discount (switch above each column). The example grids are only starting points.</p>';
+  h += '<div class="row" style="margin-top:10px"><input type="text" id="gName" placeholder="Agency name" style="flex:1 1 160px" value="' + esc(S.their.saved ? S.their.name : '') + '"><button class="btn ghost sm" data-act="savegrid">Save agency grid</button>' + (S.their.saved ? '<button class="btn ghost sm" data-act="delgrid">Delete saved</button>' : '') +
+       (S.grids.length ? '<span class="note">' + S.grids.length + ' saved' + (isPro() ? '' : ' (free keeps ' + FREE_GRIDS + ')') + '</span>' : '') + '</div>';
+  $('gridBox').innerHTML = h;
+}
+
+/* ---------- result ---------- */
+var R = null;
+function compute(){
+  var rate = +S.rate;
+  if(!S.rows.length || !(S.rows.reduce(function(s, r){ return s + (+r.qty || 0); }, 0) > 0)) return null;
+  return FG.compare(S.rows, S.their, S.mine, rate > 0 ? rate : 0, S.minFee);
+}
+function renderSlip(){
+  R = compute();
+  var rate = +S.rate, body = '';
+  if(!R){
+    $('slipK').textContent = 'Their grid pays'; $('slipBig').textContent = '—';
+    $('slipBody').innerHTML = '<p class="line" style="font-size:16px">Paste an analysis on the left (or <button class="btn ghost sm" data-act="sample">try the sample</button>), then enter your rate.</p>';
+    $('barAmt').textContent = '—'; $('barRate').textContent = ''; renderMsg(); return;
+  }
+  var a = R.their, st = checkState();
+  if(st === 'mismatch' || st === 'ambiguous'){
+    if(st === 'ambiguous' && S.why === 'blocks'){ $('slipK').textContent = 'One question first'; $('slipBig').textContent = '—'; $('slipBody').innerHTML = '<p class="line">Your paste has more than one table. Answer the question in step 1 so nothing is counted twice.</p>'; $('barAmt').textContent = '—'; $('barRate').textContent = ''; R = null; renderMsg(); return; }
+    $('slipK').textContent = 'Check the numbers first'; $('slipBig').textContent = '—';
+    $('slipBody').innerHTML = '<p class="line">' + (st === 'ambiguous' ? (S.why === 'nochars' ? 'No characters column found. Pick a column in step 1 or count words.' : 'I\'m not sure which column is the ' + unitW() + ' count. Pick it in step 1.') : 'The bands don\'t add up to the report\'s Total, so any amount here could be wrong. Fix the rows or the column in step 1.') + '</p>';
+    $('barAmt').textContent = '—'; $('barRate').textContent = ''; R = null; renderMsg(); return;
+  }
+  if(!ready('their')){
+    $('slipK').textContent = 'One more step'; $('slipBig').textContent = '—';
+    $('slipBody').innerHTML = '<p class="line">Enter the agency\'s percentages in step 2 (or pick a saved grid). Until then there is nothing to compare: the example grid is only a placeholder.</p><p class="note">' + n0(a.raw) + ' ' + unitWs() + ' read from your analysis.</p>';
+    $('barAmt').textContent = '—'; $('barRate').textContent = ''; R = null; renderMsg(); return;
+  }
+  if(!(rate > 0)){
+    $('slipK').textContent = 'Their grid counts'; $('slipBig').textContent = n1(a.weighted) + ' ' + unitWs();
+    body += '<p class="line">' + n0(a.raw) + ' ' + unitWs() + ' in the analysis, paid as <b>' + n1(a.weighted) + '</b> full-rate ' + unitWs() + ' (' + pc(a.share) + ').</p>';
+    body += '<p class="line" style="font-size:16px">Enter your full rate to see the money.</p>';
+    $('barAmt').textContent = n1(a.weighted) + ' wtd'; $('barRate').textContent = '';
+  } else {
+    if(ACTED) trackOnce('result-shown');
+    $('slipK').textContent = 'Their grid pays'; $('slipBig').textContent = money(R.theirAmount);
+    body += '<p class="line">That is <span class="hi"><b>' + rateFmt(R.effRate) + '</b></span> per ' + unitW() + ' in the file, at a full rate of ' + rateFmt(rate) + '.</p>';
+    body += '<p class="line" style="font-size:16px">' + n0(a.raw) + ' ' + unitWs() + ' counted as ' + n1(a.weighted) + ' (' + pc(a.share) + ').' + (S.demo ? ' Example grids.' : '') + (R.belowMin ? ' Below your minimum fee of ' + money(R.minFee) + '.' : '') + (st === 'edited' ? ' Counts changed by hand.' : '') + '</p>';
+    if(!ready('mine')) body += '<p class="note">Set your own grid in step 2 to see what you would charge and the base rate that matches it.</p>';
+    else if(Math.abs(R.gap) >= 0.005){
+      if(R.gap > 0){
+        body += '<p class="line">Your grid: <b>' + money(R.myAmount) + '</b>. Their grid costs you <b>' + money(R.gap) + '</b> on this job (' + pc(R.gapPct) + ').</p>';
+        body += '<div class="ask">On this job, their grid pays what yours does at a base rate of <b class="num">' + rateFmt(R.neededRate) + '</b> (+' + pc(R.raisePct) + '). One job is one sample; the job log averages this per agency.</div>';
+      } else {
+        body += '<p class="line">Your grid: <b>' + money(R.myAmount) + '</b>. Their grid pays <b>' + money(-R.gap) + '</b> more than yours on this job.</p>';
+      }
+    } else body += '<p class="line">Same as your grid on this job.</p>';
+    $('barAmt').textContent = money(R.theirAmount); $('barRate').textContent = rateFmt(R.effRate) + '/' + (S.unit === 'chars' ? 'ch' : 'wd');
+  }
+  // breakdown
+  body += '<div class="tw"><table class="bd"><thead><tr><th>Band</th><th class="r wc">' + (S.unit === 'chars' ? 'Chars' : 'Words') + '</th><th class="r">Agency</th><th class="r">Yours</th></tr></thead><tbody>';
+  S.rows.forEach(function(r, i){
+    if(!(+r.qty)) return;
+    var t = R.their.lines[i], m = R.mine.lines[i];
+    body += '<tr><td>' + esc(r.label) + '</td><td class="r num wc">' + n0(t.qty) + '</td><td class="r num">' + t.pct + '%<span class="w"><i class="ar"> → </i>' + n1(t.weighted) + '</span></td><td class="r num">' + m.pct + '%<span class="w"><i class="ar"> → </i>' + n1(m.weighted) + '</span></td></tr>';
+  });
+  body += '</tbody><tfoot><tr><th>Weighted</th><th class="r num wc">' + n0(R.their.raw) + '</th><th class="r num">' + n1(R.their.weighted) + '</th><th class="r num">' + n1(R.mine.weighted) + '</th></tr></tfoot></table></div>';
+  // PO check
+  body += '<div style="margin-top:14px;border-top:1px dashed var(--rule);padding-top:12px" class="noprintx"><label><b>Check the PO:</b> the amount on it <input type="number" id="poAmt" step="0.01" min="0" inputmode="decimal" value="' + esc(S.po) + '" placeholder="e.g. 612.40"></label><div id="poOut"></div></div>';
+  body += '<div class="row noprint" style="margin-top:12px"><button class="btn ghost sm" data-act="savejob">Save to job log</button></div>';
+  $('slipBody').innerHTML = body;
+  renderPO();
+  renderMsg();
+}
+function poResult(){ if(!R || !(+S.rate > 0)) return null; return FG.checkPO(R.theirAmount, S.po === '' ? '' : +S.po, +S.rate, S.rows.filter(function(r){ return +r.qty; }).length); }
+function renderPO(){
+  var el = $('poOut'); if(!el) return;
+  var c = poResult();
+  if(!c){ el.innerHTML = ''; return; }
+  if(ACTED){ trackOnce('po-checked'); if(c.verdict === 'short') trackOnce('po-short'); }
+  var exp = 'Their own grid on this analysis gives ';
+  if(c.verdict === 'match') el.innerHTML = '<span class="stamp match">PO MATCHES</span><p class="note">The PO equals their own grid applied to this analysis.</p>';
+  else if(c.verdict === 'rounding') el.innerHTML = '<span class="stamp match">PO MATCHES</span><p class="note">Differs by ' + esc(money(Math.abs(c.diff))) + ', which is rounding.</p>';
+  else if(c.verdict === 'short') el.innerHTML = '<span class="stamp short">PO SHORT ' + esc(money(c.diff)) + '</span><p class="note">' + exp + esc(money(c.expected)) + '. Check that the PO uses the same analysis, then ask for a corrected PO (message below).</p>';
+  else el.innerHTML = '<span class="stamp over">PO ' + esc(money(-c.diff)) + ' HIGHER</span><p class="note">The PO pays more than their grid gives on this analysis. Maybe a different analysis or their minimum fee.</p>';
+  if(R.belowMin && c.verdict !== 'short') el.innerHTML += '<p class="note">Their grid gives less than your minimum fee of ' + esc(money(R.minFee)) + '. If your agreement with them has a minimum, ask for it.</p>';
+}
+
+/* ---------- message ---------- */
+function renderMsg(){
+  $('mPO').setAttribute('aria-pressed', S.msg.kind === 'po'); $('mGrid').setAttribute('aria-pressed', S.msg.kind === 'grid');
+  $('fPM').value = S.msg.pm; $('fPO').value = S.msg.po; $('fMe').value = S.msg.me;
+  $('msgOut').value = buildMsg();
+}
+var MSG_REAL = false;
+function buildMsg(){ MSG_REAL = false; var t = buildMsg0(); return t; }
+function buildMsg0(){
+  if(!R || !(+S.rate > 0)) return 'Paste an analysis and enter your rate first.';
+  var pm = S.msg.pm.trim() || 'there', ref = S.msg.po.trim(), me = S.msg.me.trim() || '[your name]', rate = +S.rate, u = unitW();
+  var lines = [];
+  S.rows.forEach(function(r, i){ if(+r.qty) lines.push('- ' + r.label + ': ' + n0(r.qty) + ' x ' + R.their.lines[i].pct + '% = ' + n1(R.their.lines[i].weighted)); });
+  var EM = {ctx:'Context matches (101%)', rep:'Repetitions', exact:'100% matches', f95:'95-99% matches', f85:'85-94% matches', f75:'75-84% matches', f50:'50-74% matches', 'new':'New words', mt:'MT matches', nt:'Non-translatables'};
+  if(S.msg.kind === 'po'){
+    var c = poResult();
+    if(!ready('their')) return 'Enter the agency\'s grid in step 2 first.';
+    if(!c) return 'Enter the amount on the PO (in the result box) first. A message is only needed if the PO is short.';
+    if(c.verdict !== 'short') return 'The PO is not short' + (c.verdict === 'over' ? ' (it pays more than their grid gives)' : '') + ', so there is nothing to ask for.';
+    var t = 'Hi ' + pm + ',\n\n';
+    t += 'Thanks for ' + (ref ? 'PO ' + ref : 'the PO') + '. I ran the analysis through your grid and get a higher total:\n\n' + lines.join('\n') + '\n';
+    t += '\nWeighted ' + unitWs() + ': ' + n1(R.their.weighted) + ' x ' + rateFmt(rate) + ' = ' + money(R.their.amount) + '\n';
+    t += 'The PO shows ' + money(c.po) + ', which is ' + money(c.diff) + ' less.\n';
+    t += '\nCould you check it and send an updated PO? If the PO is based on a different analysis, could you send me that one?\n\nThanks,\n' + me;
+    MSG_REAL = true; return t;
+  }
+  var g = 'Hi ' + pm + ',\n\n';
+  if(!ready('mine') || !ready('their')) return 'Set the agency\'s grid and your own grid in step 2 first (the percentages you would accept).';
+  if(S.mine.preset === 'none' && S.mine.mode !== 'discount' && !S.mine.saved && S.mine.name !== 'Custom') return 'Set your own grid in step 2 first (the percentages you would accept). An offer of 100% on every band won\'t be taken seriously.';
+  g += 'Thanks for sending your rate grid. On ' + (ref ? ref : 'this job') + ' it comes to ' + money(R.theirAmount) + ' for ' + n0(R.their.raw) + ' ' + unitWs() + ' (' + n1(R.their.weighted) + ' weighted).\n\n';
+  if(R.gap > 0.005){
+    g += 'For this job I would need ' + money(R.myAmount) + '. That is my rate of ' + rateFmt(rate) + ' with these match rates:\n';
+    bandsShown().forEach(function(b){ var p = S.mine.mode === 'discount' ? 100 - S.mine.pct[b] : S.mine.pct[b]; g += '- ' + EM[b] + ': ' + p + '% of the rate\n'; });
+    g += '\nOr, if your grid has to stay as it is, ' + rateFmt(R.neededRate) + ' a ' + u + ' as the base rate for this job comes to the same. Let me know which works better for you.\n\nBest,\n' + me;
+  } else g += 'That works for me. Happy to go ahead.\n\nBest,\n' + me;
+  MSG_REAL = true;
+  return g;
+}
+
+/* ---------- jobs ---------- */
+function renderJobs(){
+  var box = $('jobsBox'), h = '';
+  if(!S.jobs.length){ box.innerHTML = '<p class="note">No saved jobs yet. After a check, press "Save to job log".</p>'; return; }
+  var shown = isPro() ? S.jobs : S.jobs.slice(-FREE_JOBS);
+  h += '<div class="tw"><table class="jobs"><thead><tr><th>Date</th><th>Agency</th><th>PO</th><th class="r">Their grid</th><th class="r">PO</th><th></th></tr></thead><tbody>';
+  shown.slice().reverse().forEach(function(j){
+    var idx = S.jobs.indexOf(j);
+    h += '<tr><td class="num">' + esc(j.date) + '</td><td>' + esc(j.agency || '—') + '</td><td>' + esc(j.ref || '—') + '</td><td class="r num">' + esc(j.amountTxt) + '</td><td class="r num">' + esc(j.poTxt || '—') +
+         (j.verdict === 'short' ? ' <b style="color:var(--pen)">short</b>' : '') + '</td><td><button class="btn ghost sm" data-deljob="' + idx + '" aria-label="Delete job">×</button></td></tr>';
+  });
+  h += '</tbody></table></div>';
+  if(!isPro() && S.jobs.length > FREE_JOBS) h += '<p class="note">' + (S.jobs.length - FREE_JOBS) + ' older jobs are kept but hidden. <a href="#proSec" data-act="prolink">Pro</a> shows all of them.</p>';
+  // monthly totals per agency
+  var tot = {};
+  (isPro() ? S.jobs : shown).forEach(function(j){ var k = (j.date || '').slice(0, 7) + ' · ' + (j.agency || '—') + ' · ' + j.cur; tot[k] = (tot[k] || 0) + paid(j); });
+  var keys = Object.keys(tot).sort().reverse();
+  if(keys.length){ h += '<p style="margin:12px 0 4px"><b>Totals by month and agency</b> <span class="note">(PO amounts; their grid where no PO was entered)</span></p><div class="tw"><table class="jobs"><tbody>'; keys.forEach(function(k){ var cur = k.split(' · ')[2]; h += '<tr><td>' + esc(k.split(' · ').slice(0, 2).join(' · ')) + '</td><td class="r num">' + esc(fmtCur(tot[k], cur)) + '</td></tr>'; }); h += '</tbody></table></div>'; }
+  // per agency, over every saved job: what their grids really paid per word
+  var ag = {};
+  (isPro() ? S.jobs : shown).forEach(function(j){ var k = (j.agency || '—') + ' · ' + j.cur + ' · ' + (j.unit === 'chars' ? 'chars' : 'words'); var a = ag[k] = ag[k] || {n:0, raw:0, amt:0, base:0, unit:j.unit}; a.n++; a.raw += +j.raw || 0; a.amt += paid(j); a.base += (+j.raw || 0) * (+j.rate || 0); });
+  var ak = Object.keys(ag).sort();
+  if(ak.length){
+    h += '<p style="margin:12px 0 4px"><b>What each agency really pays</b></p><div class="tw"><table class="jobs"><thead><tr><th>Agency</th><th class="r">Jobs</th><th class="r">Paid per word / char</th><th class="r">Of the full rate</th></tr></thead><tbody>';
+    ak.forEach(function(k){ var a = ag[k], cur = k.split(' · ')[1]; h += '<tr><td>' + esc(k.split(' · ')[0]) + '</td><td class="r num">' + a.n + '</td><td class="r num">' + esc(a.raw ? fmtRate(a.amt / a.raw, cur) : '—') + '</td><td class="r num">' + (a.base ? pc(a.amt / a.base) : '—') + '</td></tr>'; });
+    h += '</tbody></table></div>';
+    if(!isPro()) h += '<p class="note">Free counts the last ' + FREE_JOBS + ' jobs. Pro averages every job you save, per agency.</p>';
+  }
+  h += '<div class="row" style="margin-top:10px"><button class="btn ghost sm" data-act="csv">Export CSV</button><button class="btn ghost sm" data-act="backup">Backup file</button><label class="btn ghost sm" for="restoreFile" style="cursor:pointer">Restore</label><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>';
+  box.innerHTML = h;
+}
+function paid(j){ return j.po !== '' && j.po != null && !isNaN(+j.po) ? +j.po : (+j.amount || 0); }   // what the PO says, else their grid
+function fmtRate(x, c){ try{ return new Intl.NumberFormat('en-US', {style:'currency', currency:c, minimumFractionDigits:2, maximumFractionDigits:4}).format(x); }catch(e){ return c + ' ' + x.toFixed(4); } }
+function fmtCur(x, c){ try{ return new Intl.NumberFormat('en-US', {style:'currency', currency:c}).format(x); }catch(e){ return c + ' ' + x.toFixed(2); } }
+function saveJob(){
+  if(!R || !(+S.rate > 0)){ say('Enter your rate first.'); return; }
+  if(!isPro() && S.jobs.length >= FREE_JOBS){ track('pro-limit'); }
+  var c = poResult(), d = new Date();
+  S.jobs.push({date: d.toISOString().slice(0, 10), agency: ($('gName') && $('gName').value.trim()) || (S.their.saved ? S.their.name : ''), ref: S.msg.po.trim(), cur: S.cur,
+               raw: R.their.raw, weighted: Math.round(R.their.weighted * 100) / 100, amount: Math.round(R.theirAmount * 100) / 100, amountTxt: money(R.theirAmount),
+               po: c ? c.po : '', poTxt: c ? money(c.po) : '', verdict: c ? c.verdict : '', unit: S.unit, rate: +S.rate});
+  save(); renderJobs(); track('job-saved');
+  say(!isPro() && S.jobs.length > FREE_JOBS ? 'Saved. Free shows the last ' + FREE_JOBS + ' jobs; Pro shows all.' : 'Saved to the job log.');
+}
+function csv(){
+  if(!isPro()){ track('pro-limit'); say('CSV export is part of Pro.'); $('proSec').scrollIntoView({behavior:'smooth'}); return; }
+  var head = ['date','agency','po_or_project','unit','raw_count','weighted','rate','currency','amount_by_their_grid','po_amount','po_check'];
+  var lines = [head.join(',')].concat(S.jobs.map(function(j){ return [j.date, j.agency, j.ref, j.unit, j.raw, j.weighted, j.rate, j.cur, j.amount, j.po, j.verdict].map(function(v){ v = String(v == null ? '' : v); if(/^[=+\-@]/.test(v) && isNaN(+v)) v = "'" + v; return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }));
+  download('fuzzy-grid-jobs.csv', lines.join('\n'), 'text/csv'); track('csv-export');
+}
+function download(name, text, type){ var b = new Blob([text], {type:type}), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+
+/* ---------- grids: save / pick ---------- */
+function saveGrid(){
+  var name = ($('gName').value || '').trim();
+  if(!name){ say('Type the agency name first.'); $('gName').focus(); return; }
+  var i = -1; S.grids.forEach(function(g, k){ if(g.name.toLowerCase() === name.toLowerCase()) i = k; });
+  if(i < 0 && !isPro() && S.grids.length >= FREE_GRIDS){ track('pro-limit'); say('Free keeps ' + FREE_GRIDS + ' agency grids. Pro keeps all of them.'); $('proSec').scrollIntoView({behavior:'smooth'}); return; }
+  var g = {name: name, mode: S.their.mode || 'pay', pct: clone(S.their.pct), internalAsFuzzy: !!S.their.internalAsFuzzy};
+  if(i >= 0) S.grids[i] = g; else S.grids.push(g);
+  S.their = {name: name, saved: true, mode: g.mode, pct: clone(g.pct), internalAsFuzzy: g.internalAsFuzzy};
+  save(); renderGrids(); track('grid-saved'); say('Saved "' + name + '".');
+}
+
+function delGrid(){
+  var name = S.their.name; S.grids = S.grids.filter(function(g){ return g.name !== name; });
+  S.their.saved = false; S.their.name = 'Custom'; save(); renderGrids(); say('Deleted "' + name + '".');
+}
+
+/* ---------- pro ---------- */
+function renderPro(){
+  $('priceTxt').textContent = PRICE;
+  if(isPro()){ $('proState').innerHTML = '<span class="ok">Pro is unlocked on this browser. Thank you!</span>'; $('btnBuy').style.display = 'none'; }
+  else $('proState').innerHTML = /[?&]bought=1/.test(location.search) ? '<span class="ok">Thanks for buying! Enter the email you paid with to unlock.</span>' : '';
+  var aff = (new URLSearchParams(location.search).get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  $('btnBuy').href = aff && CHECKOUT_PLAN ? CHECKOUT_PLAN + '?a=' + encodeURIComponent(aff) : CHECKOUT_HOME;
+}
+async function sha256(s){ var b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return Array.prototype.map.call(new Uint8Array(b), function(x){ return ('0' + x.toString(16)).slice(-2); }).join(''); }
+var unlocking = false;
+function unlock(){
+  var v = ($('proKey').value || '').trim(), msg = $('proMsg');
+  if(unlocking) return;
+  if(!v){ msg.innerHTML = '<span class="err">Type the email you paid with, or your gift code.</span>'; return; }
+  if(v.indexOf('@') < 0){
+    sha256(v.replace(/\s+/g, '').toUpperCase()).then(function(hx){
+      if(GIFT.indexOf(hx) >= 0){ PRO = {gift: hx.slice(0, 12)}; lsSet(PROKEY, PRO); track('pro-gift'); track('gift-' + hx.slice(0, 8)); msg.textContent = ''; renderAll(); say('Pro unlocked. Enjoy!'); }
+      else { msg.innerHTML = '<span class="err">That code doesn\'t match. Check the spelling, or use the email you paid with.</span>'; }
+    });
+    return;
+  }
+  unlocking = true; msg.textContent = 'Checking…';
+  fetch(VERIFY_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({app:APP_KEY, email:v})})
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      unlocking = false;
+      if(j && j.ok && j.valid){ PRO = {email:v.toLowerCase()}; lsSet(PROKEY, PRO); track('pro-unlocked'); msg.textContent = ''; renderAll(); say('Pro unlocked. Thank you!'); }
+      else { track('pro-notfound'); msg.innerHTML = '<span class="err">No purchase found for that email. Use the exact email from your Whop receipt.</span>'; }
+    }).catch(function(){ unlocking = false; msg.innerHTML = '<span class="err">Couldn\'t reach the checker. Check your connection and try again.</span>'; });
+}
+
+/* ---------- render all ---------- */
+function renderAll(){
+  $('paste').value = S.text; $('rate').value = S.rate; $('cur').value = S.cur; $('minFee').value = S.minFee;
+  $('uWords').setAttribute('aria-pressed', S.unit === 'words'); $('uChars').setAttribute('aria-pressed', S.unit === 'chars'); $('unitWord').textContent = unitW();
+  renderRows(); renderGrids(); renderSlip(); renderJobs(); renderPro();
+}
+function soft(){ save(); renderSlip(); }   // recompute without rebuilding the inputs being typed in
+
+/* ---------- events ---------- */
+var started = false;
+function start(){ if(!started){ started = true; track('tool-start'); } }
+var pasteT;
+$('paste').addEventListener('input', function(){
+  act(); S.demo = false; S.text = this.value; S.col = null; S.blockMode = '';
+  clearTimeout(pasteT); pasteT = setTimeout(function(){ reparse('fresh'); save(); $('rate').value = S.rate; $('cur').value = S.cur; renderRows(); renderGrids(); renderSlip(); }, 250);
+});
+$('xmlFile').addEventListener('change', function(){
+  var f = this.files && this.files[0]; if(!f) return;
+  start();
+  var rd = new FileReader();
+  rd.onload = function(){
+    var t = String(rd.result || '');
+    if(/<(table|html)/i.test(t) && !/<analyse>/.test(t)){   // an HTML report: keep the cell text, one row per line
+      var d = new DOMParser().parseFromString(t, 'text/html');
+      t = Array.prototype.map.call(d.querySelectorAll('tr'), function(tr){ return Array.prototype.map.call(tr.children, function(td){ return td.textContent.trim(); }).join('\t'); }).join('\n');
+    }
+    act(); S.demo = false; S.text = t; S.col = null; S.blockMode = ''; reparse('fresh'); track(S.src === 'trados-xml' ? 'xml-loaded' : 'file-loaded'); save(); renderAll();
+    if(!S.rows.length) say('No match bands found in that file.');
+  };
+  rd.readAsText(f); this.value = '';
+});
+$('btnSample').addEventListener('click', function(){ start(); S.demo = true; S.text = SAMPLE; S.col = null; S.blockMode = ''; S.fromPO = ''; reparse('quiet'); if(!(+S.rate > 0)) S.rate = '0.10'; track('sample-loaded'); save(); renderAll(); });
+$('btnManual').addEventListener('click', function(){ act(); S.demo = false; manualRows(); track('manual-mode'); save(); renderAll(); });
+function setUnit(u){ if(S.unit === u) return; S.unit = u; S.col = null; if(S.text.trim()) reparse('quiet'); save(); renderAll(); }
+$('uWords').addEventListener('click', function(){ setUnit('words'); });
+$('uChars').addEventListener('click', function(){ setUnit('chars'); });
+$('rate').addEventListener('input', function(){ act(); S.rate = this.value; soft(); });
+$('cur').addEventListener('change', function(){ S.cur = this.value; soft(); renderJobs(); });
+$('minFee').addEventListener('input', function(){ S.minFee = this.value; soft(); });
+['fPM','fPO','fMe'].forEach(function(id, k){ $(id).addEventListener('input', function(){ S.msg[['pm','po','me'][k]] = this.value; save(); $('msgOut').value = buildMsg(); }); });
+$('mPO').addEventListener('click', function(){ S.msg.kind = 'po'; save(); renderMsg(); });
+$('mGrid').addEventListener('click', function(){ S.msg.kind = 'grid'; save(); renderMsg(); });
+$('btnCopy').addEventListener('click', function(){
+  var t = $('msgOut').value;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ say('Copied. Paste it into your email.'); }, function(){ $('msgOut').select(); document.execCommand && document.execCommand('copy'); say('Copied.'); });
+  if(MSG_REAL){ act(); track('msg-copied'); track('msg-' + S.msg.kind); }   // only a real letter, not a hint
+});
+$('btnPrint').addEventListener('click', function(){ track('print'); window.print(); });
+$('bar').addEventListener('click', function(){ $('slip').scrollIntoView({behavior:'smooth'}); });
+$('btnBuy').addEventListener('click', function(){ track('buy-click'); });
+$('btnUnlock').addEventListener('click', unlock);
+$('proKey').addEventListener('keydown', function(e){ if(e.key === 'Enter') unlock(); });
+
+document.addEventListener('input', function(e){
+  var t = e.target, d = t.dataset || {};
+  if(d.qty != null){ var r = S.rows[+d.qty]; if(r){ r.qty = Math.max(0, +t.value || 0); edited(); save(); renderSlip(); var sumEl = t.closest('table').querySelector('tfoot .num'); if(sumEl) sumEl.textContent = n0(S.rows.reduce(function(s, x){ return s + (+x.qty || 0); }, 0)); renderCheck(); } return; }
+  if(d.pct){ act(); var p = d.pct.split(':'); S[p[0]].confirmed = true; S[p[0]].pct[p[1]] = t.value === '' ? 0 : Math.max(0, +t.value); S[p[0]].name = 'Custom'; S[p[0]].saved = false; trackOnce('grid-edited'); soft(); return; }
+  if(t.id === 'poAmt'){ act(); S.po = t.value; save(); renderPO(); $('msgOut').value = buildMsg(); return; }
+});
+document.addEventListener('change', function(e){
+  var t = e.target, d = t.dataset || {};
+  if(t.id === 'colSel'){ S.col = +t.value; reparse('quiet'); save(); renderAll(); return; }
+  if(d.band != null){ var r = S.rows[+d.band]; if(r){ edited(); r.band = t.value; if(r.kind === 'ifuzzy' && !/^f/.test(t.value)) r.kind = t.value; save(); renderGrids(); renderSlip(); } return; }
+  if(d.ifz){ act(); S[d.ifz].internalAsFuzzy = t.checked; soft(); return; }
+  if(d.gmode){ act(); S[d.gmode].confirmed = true; S[d.gmode].mode = t.value; S[d.gmode].name = 'Custom'; S[d.gmode].saved = false; save(); renderGrids(); renderSlip(); return; }
+  if(d.gsel){
+    var v = t.value; if(!v) return;
+    act();
+    if(v.indexOf('p:') === 0) S[d.gsel] = preset(v.slice(2), true);
+    else { var g = S.grids[+v.slice(2)]; if(g) S[d.gsel] = {name: g.name, saved: true, mode: g.mode === 'discount' ? 'discount' : 'pay', pct: clone(g.pct), internalAsFuzzy: !!g.internalAsFuzzy}; }
+    FG.BAND_IDS.forEach(function(b){ if(isNaN(+S[d.gsel].pct[b])) S[d.gsel].pct[b] = 100; });
+    save(); renderGrids(); renderSlip(); return;
+  }
+  if(t.id === 'restoreFile'){
+    var f = t.files && t.files[0]; if(!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){ try{ var o = JSON.parse(rd.result); if(!o || !o.fg) throw 0; lsSet(KEY, o.fg); location.reload(); }catch(err){ say('That file is not a Fuzzy Grid backup.'); } };
+    rd.readAsText(f); t.value = ''; return;
+  }
+});
+document.addEventListener('click', function(e){
+  var t = e.target.closest('button,a'); if(!t) return;
+  var d = t.dataset || {};
+  if(d.del != null){ S.rows.splice(+d.del, 1); edited(); save(); renderRows(); renderGrids(); renderSlip(); return; }
+  if(d.deljob != null){ S.jobs.splice(+d.deljob, 1); save(); renderJobs(); return; }
+  switch(d.act){
+    case 'manual': start(); S.demo = false; manualRows(); track('manual-mode'); save(); renderAll(); break;
+    case 'sample': $('btnSample').click(); break;
+    case 'addrow': S.rows.push({label:'Other', kind:'new', band:'new', qty:0}); edited(); save(); renderRows(); renderGrids(); break;
+    case 'savegrid': saveGrid(); break;
+    case 'savejob': saveJob(); break;
+    case 'csv': csv(); break;
+    case 'blk-one': S.blockMode = 'one'; reparse('quiet'); save(); renderAll(); break;
+    case 'blk-sum': S.blockMode = 'sum'; reparse('quiet'); save(); renderAll(); break;
+    case 'delgrid': delGrid(); break;
+    case 'backup': if(!isPro()){ track('pro-limit'); say('The backup file is part of Pro.'); $('proSec').scrollIntoView({behavior:'smooth'}); break; } download('fuzzy-grid-backup.json', JSON.stringify({fg: S, saved: new Date().toISOString()}), 'application/json'); track('backup'); break;
+    case 'prolink': track('pro-limit'); break;
+  }
+});
+
+/* ---------- boot ---------- */
+if(S.text.trim()) reparse('boot');   // keeps hand edits made to these same rows
+renderAll();
+try{ var seenPro = false; new IntersectionObserver(function(es){ es.forEach(function(x){ if(x.isIntersecting && !seenPro && !isPro()){ seenPro = true; track('pro-view'); } }); }).observe($('proSec')); }catch(e){}
+if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://' + GC_CODE + '.goatcounter.com/count'); document.head.appendChild(gs); }
+(function(){
+  var q = new URLSearchParams(location.search);
+  var via = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  if(via) track('via-' + via);
+  if(af) track('aff-' + af);
+  if(q.get('bought') === '1' && !isPro()) setTimeout(function(){ $('proSec').scrollIntoView(); $('proKey').focus(); }, 400);
+  if(via.indexOf('selftest') === 0 && q.get('fire') === 'all'){   // live check only: every event once, plus its .selftest copy
+    ['tool-start','analysis-parsed','result-shown','po-checked','po-short','msg-copied','print','job-saved','pro-view','pro-limit','buy-click','pro-unlocked','pro-gift',
+     'pro-notfound','sample-loaded','xml-loaded','manual-mode','grid-edited','grid-saved','csv-export','parse-mismatch'].forEach(function(n){ track(n); });
+  }
+})();
+window.FGAPP = {state:function(){ return S; }, result:function(){ return R; }, pending:function(){ return QUEUE.length + (SENDING ? 1 : 0); }};   // for tests
+})();
+</script>
+</body>
+</html>
