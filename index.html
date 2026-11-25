@@ -734,8 +734,20 @@ var KEY = 'fg.v1', PROKEY = 'fg.pro', FREE_GRIDS = 3, FREE_JOBS = 3;
 
 /* ---------- measurement (GoatCounter). Copied from Handbell Chart / Family Formals: the ?via code follows the visitor down the funnel. ---------- */
 var GC_CODE = 'fuzzygrid';
+/* Letters (FACTORY 7, 11-25): each recipient gets ?via=fg012 for themselves and ?via=fg012-s to pass on. via-<code> keeps the full code
+   (the ledger's "letters with share visits" counts via-fg012-s); funnel copies use the group: fgl = letter recipient, fgs = someone they passed it to.
+   A browser that already came in on fg012 and then opens fg012-s is the recipient checking their own share link: no via-fg012-s (bond-hours scheme). */
+var VIA_EV = '';
 var SRC = (function(){ try{
   var q = new URLSearchParams(location.search), v = (q.get('via') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
+  VIA_EV = q.get('via') ? v : '';
+  var m = /^fg(\d{3})(-s)?$/.exec(v);
+  if(m){
+    var seen = []; try{ seen = JSON.parse(localStorage.getItem('fg.vias') || '[]'); if(!Array.isArray(seen)) seen = []; }catch(e){ seen = []; }
+    if(!m[2] && seen.indexOf(v) < 0){ seen.push(v); try{ localStorage.setItem('fg.vias', JSON.stringify(seen.slice(-20))); }catch(e){} }
+    if(m[2] && seen.indexOf('fg' + m[1]) >= 0){ VIA_EV = ''; m[2] = ''; }
+    v = m[2] ? 'fgs' : 'fgl';
+  }
   if(v){ sessionStorage.setItem('fg.src', v); return v; }
   return sessionStorage.getItem('fg.src') || '';
 }catch(e){ return ''; } })();
@@ -1277,7 +1289,7 @@ if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src 
 (function(){
   var q = new URLSearchParams(location.search);
   var via = (q.get('via') || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
-  if(via) track('via-' + via);
+  if(VIA_EV) track('via-' + VIA_EV);
   if(af) track('aff-' + af);
   if(q.get('bought') === '1' && !isPro()) setTimeout(function(){ $('proSec').scrollIntoView(); $('proKey').focus(); }, 400);
   if(via.indexOf('selftest') === 0 && q.get('fire') === 'all'){   // live check only: every event once, plus its .selftest copy
